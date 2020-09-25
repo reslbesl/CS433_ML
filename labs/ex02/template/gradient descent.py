@@ -7,7 +7,11 @@ def compute_gradient(y, tx, w):
     # INSERT YOUR CODE HERE
     # TODO: compute gradient and loss
     # ***************************************************
-    raise NotImplementedError
+    return -1/len(y)*np.dot(tx.T,y-np.dot(tx,w))
+
+def compute_subgradient(y, tx, w):
+    common=np.sign(y-np.dot(tx,w))
+    return -1/len(y)*np.array([np.sum(common), np.sum(tx[:,1]*common)])
 
 
 def gradient_descent(y, tx, initial_w, max_iters, gamma):
@@ -21,12 +25,15 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma):
         # INSERT YOUR CODE HERE
         # TODO: compute gradient and loss
         # ***************************************************
-        raise NotImplementedError
+        #loss=compute_loss(y, tx, w)
+        loss=compute_lossMAE(y, tx, w)
+        #gradient=compute_gradient(y, tx, w)
+        gradient=compute_subgradient(y, tx, w)
         # ***************************************************
         # INSERT YOUR CODE HERE
         # TODO: update w by gradient
         # ***************************************************
-        raise NotImplementedError
+        w=w-gamma*gradient
         # store w and loss
         ws.append(w)
         losses.append(loss)
