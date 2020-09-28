@@ -1,6 +1,12 @@
 """Gradient Descent"""
 import numpy as np
-from labs.ex02.template.costs import compute_loss_mae, compute_loss_mse
+import os
+import sys
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+
+from costs import *
 
 def compute_gradient_mse(y, tx, w):
     """Compute the gradient under MSE loss."""

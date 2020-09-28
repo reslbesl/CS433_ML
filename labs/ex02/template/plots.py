@@ -2,6 +2,13 @@
 """function for plot."""
 import matplotlib.pyplot as plt
 import numpy as np
+
+import os
+import sys
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+
 from grid_search import get_best_parameters
 
 

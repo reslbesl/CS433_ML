@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
 """Stochastic Gradient Descent"""
 
-def compute_stoch_gradient(y, tx, w):
+import numpy as np
+import os
+import sys
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+
+from costs import *
+
+
+def compute_stoch_gradient_mse(y, tx, w):
     """Compute a stochastic gradient from just few examples n and their corresponding y_n labels."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO: implement stochastic gradient computation.It's same as the gradient descent.
-    # ***************************************************
-    return -1/len(y)*np.dot(tx.T,y-np.dot(tx,w))
+    n, d = tx.shape
+
+    e = y - tx.dot(w)
+
+    return -tx.T.dot(e) / n
+
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
@@ -35,37 +46,34 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 
-def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
+def stochastic_gradient_descent_mse(y, tx, initial_w, batch_size, max_iters, gamma):
     """Stochastic gradient descent algorithm."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO: implement stochastic gradient descent.
-    # ***************************************************
+    n,d = tx.shape
+
     ws = [initial_w]
-    losses = []
+    initial_loss = compute_loss_mse(y, tx, initial_w)
+    losses = [initial_loss]
+
     w = initial_w
-    for n_iter in range(max_iters):
-        # ***************************************************
-        # INSERT YOUR CODE HERE
-        # TODO: compute gradient and loss
-        # ***************************************************
-        #loss=compute_loss(y, tx, w)
-        loss=compute_lossMAE(y, tx, w)
-        batch=batch_iter(y, tx, batch_size)
-        
-        for i,j in batch:
-            batch_y=i
-            batch_tx=j
-        #gradient=compute_stoch_gradient(batch_y, batch_tx, w)
-        gradient=compute_subgradient(batch_y, batch_tx, w)
-        # ***************************************************
-        # INSERT YOUR CODE HERE
-        # TODO: update w by gradient
-        # ***************************************************
-        w=w-gamma*gradient
-        # store w and loss
+    n_iter = 0
+
+    for batch_y, batch_tx in batch_iter(y, tx, batch_size, max_iters):
+        # Compute gradient for current batch
+        gradient = compute_stoch_gradient_mse(batch_y, batch_tx, w)
+
+        # Update model parameters
+        w = w - gamma * gradient
+
+        # Compute new loss
+        loss = compute_loss_mse(y, tx, initial_w)
+
+        # Store w and loss
         ws.append(w)
         losses.append(loss)
+
         print("Stochastic GD({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
               bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+
+        n_iter += 1
+
     return losses, ws

@@ -2,8 +2,13 @@
 """ Grid Search"""
 
 import numpy as np
-import costs
-#need to import compute_loss
+import os
+import sys
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+
+from costs import *
 
 
 def generate_w(num_intervals):
@@ -24,5 +29,5 @@ def grid_search(y, tx, w0, w1):
     losses = np.zeros((len(w0), len(w1)))
     for index_w0 in range(len(w0)):
         for index_w1 in range(len(w1)):
-            losses[index_w0, index_w1]=compute_loss(y,tx,np.array([w0[index_w0], w1[index_w1]]))
+            losses[index_w0, index_w1]=compute_loss_mse(y,tx,np.array([w0[index_w0], w1[index_w1]]))
     return losses
