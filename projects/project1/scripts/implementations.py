@@ -1,12 +1,14 @@
 import numpy as np
 
+### Main functions to implement
+
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """
     Linear regression using gradient descent
 
     :param y: np.array: (n, ): array containing the target variable values of n record
-    :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
     :param initial_w: np.array: (d, ): array containing the initial modeo parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
@@ -39,8 +41,8 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     Linear regression using stochastic gradient descent with default mini-batch size 1.
 
     :param y: np.array: (n, ): array containing the target variable values of n record
-    :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
-    :param initial_w: np.array: (d, ): array containing the initial modeo parameter values
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
 
@@ -69,6 +71,9 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
         return w, loss
 
 
+### Dependencies
+
+
 def compute_loss_mse(y, tx, w):
     """
     Calculate the MSE loss under weights vector w
@@ -86,6 +91,23 @@ def compute_gradient_mse(y, tx, w):
     e = y - tx.dot(w)
 
     return -tx.T.dot(e) / n
+
+
+### Helper functions
+
+
+def standardise(x):
+    mu = np.mean(x, axis=0)
+    sigma = np.std(x, axis=0)
+
+    std_x = (x - mu) / sigma
+
+    return std_x, mu, sigma
+
+
+def standardise_to_fixed(x, mu, sigma):
+
+    return (x - mu) / sigma
 
 
 def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
@@ -112,3 +134,38 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
         end_index = min((batch_num + 1) * batch_size, data_size)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+
+
+def train_eval_split(y, tx, train_size=.75, num_splits=1):
+    """
+    Yields a random split of the input data into train and test.
+    This method does not guarantee that splits are different so depending on the dataset size you might expect overlaps.
+
+    Example use:
+    for train_data, eval_data in train_eval_split(y, tx):
+        y_train, tx_train = train_data
+        <use data to train model>
+
+        y_eval, tx_eval = eval_data
+        <use data to evaluate model>
+
+    :param y: np.array: (n, ): array containing the target variable values of n record
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
+    :param train_size: float: value between 0 and 1 that indicates what fraction of data is used as train sample
+    :param num_splits: int: number of iterations
+    :return:
+    """
+
+    num_samples = len(y)
+    num_train = int(np.ceil(num_samples*train_size))
+
+    for _ in range(num_splits):
+        shuffle_indices = np.random.permutation(num_samples)
+        shuffled_y = y[shuffle_indices]
+        shuffled_tx = tx[shuffle_indices]
+
+        yield (shuffled_y[:num_train], shuffled_tx[:num_train]), (shuffled_y[num_train:], shuffled_tx[num_train:])
+
+
+def get_accuracy(y_pred, y_true):
+    return sum(y_pred == y_true)/len(y_true)
