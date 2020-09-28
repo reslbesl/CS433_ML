@@ -1,22 +1,21 @@
-# -*- coding: utf-8 -*-
-"""Function used to compute the loss."""
+""" Various common loss functions """
 
-#MES
-def compute_loss(y, tx, w):
-    """Calculate the loss.
+import numpy as np
 
-    You can calculate the loss using mse.
+def compute_loss_mse(y, tx, w):
     """
-    return 1/(2*len(y))*np.sum((y-np.dot(tx,w))**2)
-    raise NotImplementedError
-
-def compute_lossMAE(y, tx, w):
-    """Calculate the loss.
-
-    You can calculate the loss using mae.
+    Calculate the MSE loss
     """
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO: compute loss by MAE
-    # ***************************************************
-    return 1/len(y)*np.sum(np.abs(y-np.dot(tx,w)))
+    n, d = tx.shape
+    e = y - tx.dot(w)
+
+    return e.dot(e)/(2*n)
+
+def compute_loss_mae(y, tx, w):
+    """
+    Calculate MAE loss.
+    """
+    n, d = tx.shape
+    e = y - tx.dot(w)
+
+    return sum(abs(e))/(n)
