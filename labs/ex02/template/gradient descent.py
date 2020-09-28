@@ -1,43 +1,74 @@
-# -*- coding: utf-8 -*-
 """Gradient Descent"""
+import numpy as np
+from labs.ex02.template.costs import compute_loss_mae, compute_loss_mse
 
-def compute_gradient(y, tx, w):
-    """Compute the gradient."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO: compute gradient and loss
-    # ***************************************************
-    return -1/len(y)*np.dot(tx.T,y-np.dot(tx,w))
+def compute_gradient_mse(y, tx, w):
+    """Compute the gradient under MSE loss."""
+    n, d = tx.shape
 
-def compute_subgradient(y, tx, w):
+    e = y - tx.dot(w)
+
+    return -tx.T.dot(e) / n
+
+
+def compute_subgradient_mae(y, tx, w):
     common=np.sign(y-np.dot(tx,w))
     return -1/len(y)*np.array([np.sum(common), np.sum(tx[:,1]*common)])
 
 
-def gradient_descent(y, tx, initial_w, max_iters, gamma):
-    """Gradient descent algorithm."""
-    # Define parameters to store w and loss
+def gradient_descent_mae(y, tx, initial_w, max_iters, gamma):
+    """Gradient descent algorithm for a two-parameter model."""
+
     ws = [initial_w]
-    losses = []
+    initial_loss = compute_loss_mae(y, tx, initial_w)
+    losses = [initial_loss]
+
     w = initial_w
+
     for n_iter in range(max_iters):
-        # ***************************************************
-        # INSERT YOUR CODE HERE
-        # TODO: compute gradient and loss
-        # ***************************************************
-        #loss=compute_loss(y, tx, w)
-        loss=compute_lossMAE(y, tx, w)
-        #gradient=compute_gradient(y, tx, w)
-        gradient=compute_subgradient(y, tx, w)
-        # ***************************************************
-        # INSERT YOUR CODE HERE
-        # TODO: update w by gradient
-        # ***************************************************
-        w=w-gamma*gradient
-        # store w and loss
+        # Compute subgradient
+        gradient = compute_subgradient_mae(y, tx, w)
+
+        # Update model parameters
+        w = w - gamma * gradient
+
+        # Compute new loss
+        loss = compute_loss_mae(y, tx, w)
+
+        # Store w and loss
         ws.append(w)
         losses.append(loss)
+
         print("Gradient Descent({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
               bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+
+    return losses, ws
+
+
+def gradient_descent_mse(y, tx, initial_w, max_iters, gamma):
+    """Gradient descent algorithm for a two-parameter model."""
+
+    ws = [initial_w]
+    initial_loss = compute_loss_mse(y, tx, initial_w)
+    losses = [initial_loss]
+
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        # Compute gradient
+        gradient = compute_gradient_mse(y, tx, w)
+
+        # Update model parameters
+        w = w - gamma * gradient
+
+        # Compute new loss
+        loss = compute_loss_mse(y, tx, w)
+
+        # Store w and loss
+        ws.append(w)
+        losses.append(loss)
+
+        print("Gradient Descent({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
+            bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
 
     return losses, ws
