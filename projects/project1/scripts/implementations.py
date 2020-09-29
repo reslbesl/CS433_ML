@@ -1,8 +1,6 @@
 import numpy as np
 
-### Main functions to implement
-
-
+# Main functions to implement
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """
     Linear regression using gradient descent
@@ -70,9 +68,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 
-### Dependencies
-
-
+# Dependencies
 def compute_loss_mse(y, tx, w):
     """ Calculate the MSE loss under weights vector w """
     e = y - tx.dot(w)
@@ -87,9 +83,7 @@ def compute_gradient_mse(y, tx, w):
     return -tx.T.dot(e) / len(e)
 
 
-### Helper functions
-
-
+# Helper functions
 def standardise(x):
     mu = np.mean(x, axis=0)
     sigma = np.std(x, axis=0)
