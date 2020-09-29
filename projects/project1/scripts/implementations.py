@@ -19,19 +19,19 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     assert gamma > 0, "Step size gamma must be positive."
 
     w = initial_w
-    loss = compute_loss_mse(y, tx, initial_w)
+    loss = compute_loss_mse(y, tx, w)
 
     for n_iter in range(max_iters):
         # Compute gradient
-        g = compute_gradient_mse(y, tx, w)
+        grad = compute_gradient_mse(y, tx, w)
 
         # Update parameters according to gradient
-        w = w  - gamma * g
+        w -= gamma * grad
 
         # Compute new loss
         loss = compute_loss_mse(y, tx, w)
 
-        print("Gradient Descent({bi}/{ti}): loss={l}".format(bi=n_iter, ti=max_iters - 1, l=loss))
+        print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
 
     return w, loss
 
@@ -51,46 +51,40 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     assert gamma > 0, "Step size gamma must be positive."
 
     w = initial_w
-    n_iter = 0
+    loss = compute_loss_mse(y, tx, w)
 
-    for batch_y, batch_tx in batch_iter(y, tx, batch_size=1, num_batches=max_iters):
+    for n_iter in range(max_iters):
+        for batch_y, batch_tx in batch_iter(y, tx, batch_size=1, num_batches=1):
 
-        # Compute gradient for current batch
-        gradient = compute_gradient_mse(batch_y, batch_tx, w)
+            # Compute gradient for current batch
+            grad = compute_gradient_mse(batch_y, batch_tx, w)
 
-        # Update model parameters
-        w = w - gamma * gradient
+            # Update model parameters
+            w = w - gamma * grad
 
-        # Compute new loss
-        loss = compute_loss_mse(y, tx, initial_w)
+            # Compute new loss
+            loss = compute_loss_mse(y, tx, w)
 
-        print("Stochastic GD({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+            print("Stochastic GD({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
 
-        n_iter += 1
-
-        return w, loss
+    return w, loss
 
 
 ### Dependencies
 
 
 def compute_loss_mse(y, tx, w):
-    """
-    Calculate the MSE loss under weights vector w
-    """
-    n, d = tx.shape
+    """ Calculate the MSE loss under weights vector w """
     e = y - tx.dot(w)
 
-    return e.dot(e)/(2*n)
+    return e.dot(e)/(2*len(e))
 
 
 def compute_gradient_mse(y, tx, w):
     """Compute the gradient under MSE loss."""
-    n, d = tx.shape
-
     e = y - tx.dot(w)
 
-    return -tx.T.dot(e) / n
+    return -tx.T.dot(e) / len(e)
 
 
 ### Helper functions
