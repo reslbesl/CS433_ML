@@ -68,6 +68,44 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 
+# Variants
+def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7):
+    """
+    Linear regression using stochastic gradient descent with default mini-batch size 1 and decreasing step-size.
+
+    :param y: np.array: (n, ): array containing the target variable values of n record
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param max_iters: int: scalar value indicating the maximum number of iterations to run
+    :param gamma: float: gradient step-size
+
+    :return: (w, loss)
+    """
+    assert .5 < r_gamma < 1, 'Parameter r must be in (0.5, 1)'
+
+    w = initial_w
+    loss = compute_loss_mse(y, tx, w)
+
+    for n_iter in range(max_iters):
+        for batch_y, batch_tx in batch_iter(y, tx, batch_size=1, num_batches=1):
+
+            # Compute gradient for current batch
+            grad = compute_gradient_mse(batch_y, batch_tx, w)
+
+            # Update step size
+            gamma = 1/((n_iter + 1)**r_gamma)
+
+            # Update model parameters
+            w = w - gamma * grad
+
+            # Compute new loss
+            loss = compute_loss_mse(y, tx, w)
+
+            print("Stochastic GD({bi}/{ti}): loss={l}, gradient={grad}, gamma={gam}".format(bi=n_iter, ti=max_iters - 1, l=loss, grad=np.linalg.norm(grad), gam=gamma))
+
+    return w, loss
+
+
 # Dependencies
 def compute_loss_mse(y, tx, w):
     """ Calculate the MSE loss under weights vector w """
@@ -157,3 +195,24 @@ def train_eval_split(y, tx, train_size=.75, num_splits=1):
 
 def get_accuracy(y_pred, y_true):
     return sum(y_pred == y_true)/len(y_true)
+
+
+def get_pos_rates(y_pred, y_true):
+    tp = sum(y_pred[y_true == 1] == 1)
+    fp = sum(y_true == 1) - tp
+
+    return tp, fp
+
+
+def get_neg_rates(y_pred, y_true):
+    tn = sum(y_pred[y_true == -1] == -1)
+    fn = sum(y_true == -1) - tn
+
+    return tn, fn
+
+
+def get_f1_score(y_pred, y_true):
+    tp, fp = get_pos_rates(y_pred, y_true)
+    tn, fn = get_neg_rates(y_pred, y_true)
+
+    return tp/(tp + (fp + fn)/2.)
