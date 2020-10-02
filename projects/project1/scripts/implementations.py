@@ -7,8 +7,11 @@ def least_squares(y,tx):
     :param y: np.array: (n, ): array containing the target variable values of n record
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     """
+    #Compute Gram Matrix
+    gram = np.dot(tx.transpose(), tx)
+
     #Solve the linear system from normal equations
-    w = np.linalg.solve(tx,y)
+    w = np.dot( np.dot( np.linalg.inv(gram) ,tx.transpose()), y)
 
     #Compute loss
     loss = compute_loss_mse(y,tx,w)
