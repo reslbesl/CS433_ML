@@ -184,7 +184,7 @@ def train_eval_split(y, tx, split_ratio, seed=42):
     you will have 80% of your data set dedicated to training
     and the rest dedicated to testing
     """
-    # set seed
+    # set seed for reproducibility
     np.random.seed(seed)
 
     num_samples = len(y)
@@ -197,7 +197,7 @@ def train_eval_split(y, tx, split_ratio, seed=42):
     return (shuffled_x[:num_train], shuffled_y[:num_train]), (shuffled_x[num_train:], shuffled_y[num_train:])
 
 
-def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
+def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=42):
     """
     Generate a minibatch iterator for a dataset.
     Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
@@ -207,10 +207,13 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
         <DO-SOMETHING>
     """
-    data_size = len(y)
+    # set seed for reproducibility
+    np.random.seed(seed)
+
+    num_samples = len(y)
 
     if shuffle:
-        shuffle_indices = np.random.permutation(np.arange(data_size))
+        shuffle_indices = np.random.permutation(np.arange(num_samples))
         shuffled_y = y[shuffle_indices]
         shuffled_tx = tx[shuffle_indices]
     else:
@@ -218,12 +221,12 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
         shuffled_tx = tx
     for batch_num in range(num_batches):
         start_index = batch_num * batch_size
-        end_index = min((batch_num + 1) * batch_size, data_size)
+        end_index = min((batch_num + 1) * batch_size, num_samples)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 
-def shuffle_split(y, tx, train_size=.75, num_splits=1):
+def shuffle_split(y, tx, train_size=.75, num_splits=1, seed=42):
     """
     Yields a random split of the input data into train and test.
     This method does not guarantee that splits are different so depending on the dataset size you might expect overlaps.
@@ -242,6 +245,8 @@ def shuffle_split(y, tx, train_size=.75, num_splits=1):
     :param num_splits: int: number of iterations
     :return:
     """
+    # set seed for reproducibility
+    np.random.seed(seed)
 
     num_samples = len(y)
     num_train = int(np.ceil(num_samples*train_size))
