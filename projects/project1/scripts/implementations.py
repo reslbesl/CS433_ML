@@ -23,7 +23,7 @@ def ridge_regression(y, tx, lambda_):
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     :param lambda_: float: penalty parameter
     """
-    assert lambda_ > 0, "Step size gamma must be positive."
+    assert lambda_ > 0, "Penalty factor must be positive."
     
     #Compute Gram matrix
     gram = np.dot(tx.transpose(), tx)
