@@ -1,5 +1,46 @@
 import numpy as np
 
+def least_squares(y,tx):
+    """
+    Linear regression using normal equations
+
+    :param y: np.array: (n, ): array containing the target variable values of n record
+    :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
+    """
+    #Solve the linear system from normal equations
+    w = np.linalg.solve(tx,y)
+
+    #Compute loss
+    loss = compute_loss_mse(y,tx,w)
+    
+    return(w,loss)
+
+def ridge_regression(y, tx, lambda_):
+    """
+    Normal equations using L2 regularization
+
+    :param y: np.array: (n, ): array containing the target variable values of n record
+    :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
+    :param lambda_: float: penalty parameter
+    """
+    assert lambda_ > 0, "Step size gamma must be positive."
+    
+    #Compute Gram matrix
+    gram = np.dot(tx.transpose(), tx)
+    
+    #Compute identity dxd matrix
+    eye =  np.identity(tx.shape[1])
+
+    #Compute lambda prime as lamda/2N
+    plambda = lambda_/(2*tx.shape[0])
+
+    #Solve the linear system from normal equation using L2 regularization
+    w = np.dot( np.dot(np.linalg.inv(gram + plambda*eye), tx.transpose() ), y)
+
+    #Compute loss
+    loss = compute_loss_mse(y,tx,w)
+    
+    return(w,loss)
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """
