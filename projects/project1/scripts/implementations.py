@@ -8,12 +8,12 @@ def least_squares(y,tx):
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     """
     #Solve the linear system from normal equations
-    w = np.linalg.solve(tx,y)
+    w = np.linalg.solve(tx, y)
 
     #Compute loss
-    loss = compute_loss_mse(y,tx,w)
+    loss = compute_loss_mse(y, tx, w)
     
-    return(w,loss)
+    return w, loss
 
 def ridge_regression(y, tx, lambda_):
     """
@@ -40,7 +40,7 @@ def ridge_regression(y, tx, lambda_):
     #Compute loss
     loss = compute_loss_mse(y,tx,w)
     
-    return(w,loss)
+    return w,loss
 
 # Main functions to implement
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
@@ -178,6 +178,25 @@ def standardise_to_fixed(x, mu, sigma):
     return (x - mu) / sigma
 
 
+def train_eval_split(y, tx, split_ratio, seed=42):
+    """
+    split the dataset based on the split ratio. If ratio is 0.8
+    you will have 80% of your data set dedicated to training
+    and the rest dedicated to testing
+    """
+    # set seed
+    np.random.seed(seed)
+
+    num_samples = len(y)
+    num_train = int(np.ceil(num_samples * split_ratio))
+
+    shuffle_indices = np.random.permutation(num_samples)
+    shuffled_y = y[shuffle_indices]
+    shuffled_x = tx[shuffle_indices]
+
+    return (shuffled_x[:num_train], shuffled_y[:num_train]), (shuffled_x[num_train:], shuffled_y[num_train:])
+
+
 def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
     """
     Generate a minibatch iterator for a dataset.
@@ -204,7 +223,7 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 
-def train_eval_split(y, tx, train_size=.75, num_splits=1):
+def shuffle_split(y, tx, train_size=.75, num_splits=1):
     """
     Yields a random split of the input data into train and test.
     This method does not guarantee that splits are different so depending on the dataset size you might expect overlaps.
