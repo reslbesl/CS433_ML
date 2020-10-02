@@ -8,10 +8,10 @@ def least_squares(y,tx):
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     """
     #Compute Gram Matrix
-    gram = np.dot(tx.transpose(), tx)
+    gram = tx.T.dot(tx)
 
     #Solve the linear system from normal equations
-    w = np.dot( np.dot( np.linalg.inv(gram) ,tx.transpose()), y)
+    w = np.linalg.solve(gram,tx.T.dot(y))
 
     #Compute loss
     loss = compute_loss_mse(y,tx,w)
@@ -29,7 +29,7 @@ def ridge_regression(y, tx, lambda_):
     assert lambda_ > 0, "Penalty factor must be positive."
     
     #Compute Gram matrix
-    gram = np.dot(tx.transpose(), tx)
+    gram = tx.T.dot(x)
     
     #Compute identity dxd matrix
     eye =  np.identity(tx.shape[1])
@@ -38,7 +38,7 @@ def ridge_regression(y, tx, lambda_):
     plambda = lambda_/(2*tx.shape[0])
 
     #Solve the linear system from normal equation using L2 regularization
-    w = np.dot( np.dot(np.linalg.inv(gram + plambda*eye), tx.transpose() ), y)
+    w = np.linalg.solve((gram + plambda*eye), tx.T.dot(y)
 
     #Compute loss
     loss = compute_loss_mse(y,tx,w)
