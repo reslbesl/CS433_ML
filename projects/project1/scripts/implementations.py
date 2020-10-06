@@ -29,7 +29,7 @@ def ridge_regression(y, tx, lambda_):
     assert lambda_ > 0, "Penalty factor must be positive."
     
     #Compute Gram matrix
-    gram = tx.T.dot(x)
+    gram = tx.T.dot(tx)
     
     #Compute identity dxd matrix
     eye =  np.identity(tx.shape[1])
