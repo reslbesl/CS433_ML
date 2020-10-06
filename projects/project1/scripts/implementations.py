@@ -38,7 +38,7 @@ def ridge_regression(y, tx, lambda_):
     plambda = lambda_/(2*tx.shape[0])
 
     #Solve the linear system from normal equation using L2 regularization
-    w = np.linalg.solve((gram + plambda*eye), tx.T.dot(y)
+    w = np.linalg.solve((gram + plambda*eye), tx.T.dot(y))
 
     #Compute loss
     loss = compute_loss_mse(y,tx,w)
