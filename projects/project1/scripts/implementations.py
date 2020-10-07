@@ -35,7 +35,7 @@ def ridge_regression(y, tx, lambda_):
     eye =  np.identity(tx.shape[1])
 
     #Compute lambda prime as lamda/2N
-    plambda = lambda_/(2*tx.shape[0])
+    plambda = lambda_*(2*tx.shape[0])
 
     #Solve the linear system from normal equation using L2 regularization
     w = np.linalg.solve((gram + plambda*eye), tx.T.dot(y))
