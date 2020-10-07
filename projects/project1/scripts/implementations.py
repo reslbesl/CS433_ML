@@ -34,7 +34,7 @@ def ridge_regression(y, tx, lambda_):
     #Compute identity dxd matrix
     eye =  np.identity(tx.shape[1])
 
-    #Compute lambda prime as lamda/2N
+    #Compute lambda prime as lamda*2N
     plambda = lambda_*(2*tx.shape[0])
 
     #Solve the linear system from normal equation using L2 regularization
