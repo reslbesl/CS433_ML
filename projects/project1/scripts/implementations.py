@@ -1,19 +1,23 @@
 import numpy as np
 
-def least_squares(y,tx):
+# Main functions to implement
+def least_squares(y, tx):
     """
     Linear regression using normal equations
 
     :param y: np.array: (n, ): array containing the target variable values of n record
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     """
-    #Solve the linear system from normal equations
-    w = np.linalg.solve(tx, y)
+    # Compute Gram Matrix
+    gram = np.dot(tx.transpose(), tx)
+
+    w = np.dot( np.dot( np.linalg.inv(gram), tx.transpose()), y)
 
     #Compute loss
     loss = compute_loss_mse(y, tx, w)
-    
+
     return w, loss
+
 
 def ridge_regression(y, tx, lambda_):
     """
@@ -24,25 +28,25 @@ def ridge_regression(y, tx, lambda_):
     :param lambda_: float: penalty parameter
     """
     assert lambda_ > 0, "Penalty factor must be positive."
-    
+
     #Compute Gram matrix
     gram = np.dot(tx.transpose(), tx)
-    
-    #Compute identity dxd matrix
-    eye =  np.identity(tx.shape[1])
 
-    #Compute lambda prime as lamda/2N
+    #Compute identity dxd matrix
+    eye = np.identity(tx.shape[1])
+
+    # Compute lambda prime as lamda/2N
     plambda = lambda_/(2*tx.shape[0])
 
-    #Solve the linear system from normal equation using L2 regularization
+    # Solve the linear system from normal equation using L2 regularization
     w = np.dot( np.dot(np.linalg.inv(gram + plambda*eye), tx.transpose() ), y)
 
-    #Compute loss
-    loss = compute_loss_mse(y,tx,w)
-    
-    return w,loss
+    # Compute loss
+    loss = compute_loss_mse(y, tx, w)
 
-# Main functions to implement
+    return w, loss
+
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """
     Linear regression using gradient descent
