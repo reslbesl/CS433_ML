@@ -9,11 +9,12 @@ def least_squares(y, tx):
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
     """
     # Compute Gram Matrix
-    gram = np.dot(tx.transpose(), tx)
+    gram = tx.T.dot(tx)
 
-    w = np.dot( np.dot( np.linalg.inv(gram), tx.transpose()), y)
+    # Solve the linear system from normal equations
+    w = np.linalg.solve(gram, tx.T.dot(y))
 
-    #Compute loss
+    # Compute loss
     loss = compute_loss_mse(y, tx, w)
 
     return w, loss
@@ -29,17 +30,22 @@ def ridge_regression(y, tx, lambda_):
     """
     assert lambda_ > 0, "Penalty factor must be positive."
 
-    #Compute Gram matrix
-    gram = np.dot(tx.transpose(), tx)
+    if len(tx.shape) > 1:
+        num_samples, num_dims = tx.shape
+    else:
+        num_samples, num_dims = len(y), 1
 
-    #Compute identity dxd matrix
-    eye = np.identity(tx.shape[1])
+    # Compute Gram matrix
+    gram = tx.T.dot(tx)
 
-    # Compute lambda prime as lamda/2N
-    plambda = lambda_/(2*tx.shape[0])
+    # Compute identity dxd matrix
+    eye = np.identity(num_dims)
 
-    # Solve the linear system from normal equation using L2 regularization
-    w = np.dot( np.dot(np.linalg.inv(gram + plambda*eye), tx.transpose() ), y)
+    # Compute lambda prime as lamda*2N
+    plambda = lambda_ * 2 * num_samples
+
+    # Solve the linear system from normal equation under L2 regularization
+    w = np.linalg.solve((gram + plambda * eye), tx.T.dot(y))
 
     # Compute loss
     loss = compute_loss_mse(y, tx, w)
@@ -201,6 +207,37 @@ def train_eval_split(y, tx, split_ratio, seed=42):
     return (shuffled_x[:num_train], shuffled_y[:num_train]), (shuffled_x[num_train:], shuffled_y[num_train:])
 
 
+def k_fold_iter(y, tx, k_fold, seed=42):
+    """
+    Generate a k-fold iterator for dataset (tx, y)
+
+    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
+    Outputs an iterator which gives a k-fold train-test split of the data.
+
+    Example use:
+    for (x_train y_train), (x_test, y_test) in k_fold_iter(y, tx, 4):
+        <DO_SOMETHING>
+    
+    :param y:
+    :param tx:
+    :param k_fold:
+    :param seed:
+    """
+    np.random.seed(seed)
+
+    num_samples = len(y)
+    interval = int(num_samples / k_fold)
+
+    indices = np.random.permutation(num_samples)
+
+    for k in range(k_fold):
+        test_idx = indices[k * interval: (k + 1) * interval]
+        train_idx = np.ones(num_samples).astype(bool)
+        train_idx[test_idx] = False
+
+        yield (tx[train_idx], y[train_idx]), (tx[test_idx], y[test_idx])
+
+
 def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=42):
     """
     Generate a minibatch iterator for a dataset.
@@ -228,39 +265,6 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=42):
         end_index = min((batch_num + 1) * batch_size, num_samples)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
-
-
-def shuffle_split(y, tx, train_size=.75, num_splits=1, seed=42):
-    """
-    Yields a random split of the input data into train and test.
-    This method does not guarantee that splits are different so depending on the dataset size you might expect overlaps.
-
-    Example use:
-    for train_data, eval_data in train_eval_split(y, tx):
-        y_train, tx_train = train_data
-        <use data to train model>
-
-        y_eval, tx_eval = eval_data
-        <use data to evaluate model>
-
-    :param y: np.array: (n, ): array containing the target variable values of n record
-    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
-    :param train_size: float: value between 0 and 1 that indicates what fraction of data is used as train sample
-    :param num_splits: int: number of iterations
-    :return:
-    """
-    # set seed for reproducibility
-    np.random.seed(seed)
-
-    num_samples = len(y)
-    num_train = int(np.ceil(num_samples*train_size))
-
-    for _ in range(num_splits):
-        shuffle_indices = np.random.permutation(num_samples)
-        shuffled_y = y[shuffle_indices]
-        shuffled_tx = tx[shuffle_indices]
-
-        yield (shuffled_y[:num_train], shuffled_tx[:num_train]), (shuffled_y[num_train:], shuffled_tx[num_train:])
 
 
 def get_accuracy(y_pred, y_true):
