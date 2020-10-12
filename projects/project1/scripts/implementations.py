@@ -121,6 +121,41 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
 
 
 # Variants
+def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_):
+    """
+    Lasso regression using subgradient method
+
+    :param y: np.array: (n, ): array containing the target variable values of n record
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param max_iters: int: scalar value indicating the maximum number of iterations to run
+    :param gamma: float: gradient step-size
+
+    :return: (w, loss)
+    """
+
+    assert gamma > 0, "Step size gamma must be positive."
+
+    w = initial_w
+    loss = compute_loss_mse(y, tx, w)
+
+    for n_iter in range(max_iters):
+        # Compute gradient
+        grad = compute_gradient_lasso(y, tx, w, lambda_)
+
+        # Update parameters according to gradient
+        w -= gamma * grad
+
+        # Compute new loss
+        loss = compute_loss_mse(y, tx, w)
+
+        print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+
+    return w, loss
+
+
+
+
 def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7):
     """
     Linear regression using stochastic gradient descent with default mini-batch size 1 and decreasing step-size.
@@ -160,7 +195,7 @@ def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7):
 
 # Dependencies
 def compute_loss_mse(y, tx, w):
-    """ Calculate the MSE loss under weights vector w """
+    """ Calculate the MSE loss under weights vector w. """
     e = y - tx.dot(w)
 
     return e.dot(e)/(2*len(e))
@@ -171,6 +206,20 @@ def compute_gradient_mse(y, tx, w):
     e = y - tx.dot(w)
 
     return -tx.T.dot(e) / len(e)
+
+
+def compute_loss_lasso(y, tx, w, lambda_):
+    """ Calculate the Lasso loss under weights vector w. """
+    e = y - tx.dot(w)
+
+    return e.dot(e)/(2 * len(e)) + lambda_ * sum(abs(w))
+
+
+def compute_gradient_lasso(y, tx, w, lambda_):
+    e = y - tx.dot(w)
+    subgrad = lambda_ * np.sign(w)
+
+    return -tx.T.dot(e)/len(e) + subgrad
 
 
 # Helper functions
@@ -217,7 +266,7 @@ def k_fold_iter(y, tx, k_fold, seed=42):
     Example use:
     for (x_train y_train), (x_test, y_test) in k_fold_iter(y, tx, 4):
         <DO_SOMETHING>
-    
+
     :param y:
     :param tx:
     :param k_fold:
