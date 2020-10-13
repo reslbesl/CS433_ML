@@ -46,3 +46,49 @@ def create_csv_submission(ids, y_pred, name):
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({'Id':int(r1),'Prediction':int(r2)})
+
+
+def standardise(x):
+    """ Standardise array x where rows are samples and columns contain features """
+    mu = np.mean(x, axis=0)
+    sigma = np.std(x, axis=0)
+
+    std_x = (x - mu) / sigma
+
+    return std_x, mu, sigma
+
+
+def standardise_to_fixed(x, mu, sigma):
+    """ Standardise array x to given mean and standard deviation """
+
+    return (x - mu) / sigma
+
+
+def get_accuracy(y_pred, y_true):
+    """ Calculate accuracy of predictions y_pred in predicting true labels y_true """
+
+    return sum(y_pred == y_true)/len(y_true)
+
+
+def get_pos_rates(y_pred, y_true):
+    """ Calculate true and false positive rates of predicted labels y_pred in predicting true labels y_true """
+    tp = sum(y_pred[y_true == 1] == 1)
+    fp = sum(y_true == 1) - tp
+
+    return tp, fp
+
+
+def get_neg_rates(y_pred, y_true):
+    """ Calculate true and false negative rates of predicted labels y_pred in predicting true labels y_true """
+    tn = sum(y_pred[y_true == -1] == -1)
+    fn = sum(y_true == -1) - tn
+
+    return tn, fn
+
+
+def get_f1_score(y_pred, y_true):
+    """ Calculate F1 score of predicted labels y_pred in predicting true labels y_true """
+    tp, fp = get_pos_rates(y_pred, y_true)
+    tn, fn = get_neg_rates(y_pred, y_true)
+
+    return tp/(tp + (fp + fn)/2.)
