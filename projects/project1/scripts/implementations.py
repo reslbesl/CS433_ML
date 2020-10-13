@@ -1,12 +1,24 @@
+# -*- coding: utf-8 -*-
+"""Implementations of main functions required for project1"""
+
 import numpy as np
 
-# Main functions to implement
+from data_utils import *
+from costs import *
+
+
 def least_squares(y, tx):
     """
-    Linear regression using normal equations
+    Least-squares regression using normal equations
+
+    Takes as input a dataset (y, tx) and finds the weights vector w
+    that is the solution to the least-squares problem (X^T * X) * w = X^T * y
 
     :param y: np.array: (n, ): array containing the target variable values of n record
     :param tx: np.array: (n, d): array containing the (normalised) indepent variable values of n records
+
+    :return w: np.array: (d, ): array containing the model weights w that minimise the MSE loss
+    :return loss: float: mean-squared error under w
     """
     # Compute Gram Matrix
     gram = tx.T.dot(tx)
@@ -154,8 +166,6 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_):
     return w, loss
 
 
-
-
 def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7):
     """
     Linear regression using stochastic gradient descent with default mini-batch size 1 and decreasing step-size.
@@ -193,149 +203,4 @@ def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7):
     return w, loss
 
 
-# Dependencies
-def compute_loss_mse(y, tx, w):
-    """ Calculate the MSE loss under weights vector w. """
-    e = y - tx.dot(w)
 
-    return e.dot(e)/(2*len(e))
-
-
-def compute_gradient_mse(y, tx, w):
-    """Compute the gradient under MSE loss."""
-    e = y - tx.dot(w)
-
-    return -tx.T.dot(e) / len(e)
-
-
-def compute_loss_lasso(y, tx, w, lambda_):
-    """ Calculate the Lasso loss under weights vector w. """
-    e = y - tx.dot(w)
-
-    return e.dot(e)/(2 * len(e)) + lambda_ * sum(abs(w))
-
-
-def compute_gradient_lasso(y, tx, w, lambda_):
-    e = y - tx.dot(w)
-    subgrad = lambda_ * np.sign(w)
-
-    return -tx.T.dot(e)/len(e) + subgrad
-
-
-# Helper functions
-def standardise(x):
-    mu = np.mean(x, axis=0)
-    sigma = np.std(x, axis=0)
-
-    std_x = (x - mu) / sigma
-
-    return std_x, mu, sigma
-
-
-def standardise_to_fixed(x, mu, sigma):
-
-    return (x - mu) / sigma
-
-
-def train_eval_split(y, tx, split_ratio, seed=42):
-    """
-    split the dataset based on the split ratio. If ratio is 0.8
-    you will have 80% of your data set dedicated to training
-    and the rest dedicated to testing
-    """
-    # set seed for reproducibility
-    np.random.seed(seed)
-
-    num_samples = len(y)
-    num_train = int(np.ceil(num_samples * split_ratio))
-
-    shuffle_indices = np.random.permutation(num_samples)
-    shuffled_y = y[shuffle_indices]
-    shuffled_x = tx[shuffle_indices]
-
-    return (shuffled_x[:num_train], shuffled_y[:num_train]), (shuffled_x[num_train:], shuffled_y[num_train:])
-
-
-def k_fold_iter(y, tx, k_fold, seed=42):
-    """
-    Generate a k-fold iterator for dataset (tx, y)
-
-    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
-    Outputs an iterator which gives a k-fold train-test split of the data.
-
-    Example use:
-    for (x_train y_train), (x_test, y_test) in k_fold_iter(y, tx, 4):
-        <DO_SOMETHING>
-
-    :param y:
-    :param tx:
-    :param k_fold:
-    :param seed:
-    """
-    np.random.seed(seed)
-
-    num_samples = len(y)
-    interval = int(num_samples / k_fold)
-
-    indices = np.random.permutation(num_samples)
-
-    for k in range(k_fold):
-        test_idx = indices[k * interval: (k + 1) * interval]
-        train_idx = np.ones(num_samples).astype(bool)
-        train_idx[test_idx] = False
-
-        yield (tx[train_idx], y[train_idx]), (tx[test_idx], y[test_idx])
-
-
-def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=42):
-    """
-    Generate a minibatch iterator for a dataset.
-    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
-    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
-    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
-    Example of use :
-    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
-        <DO-SOMETHING>
-    """
-    # set seed for reproducibility
-    np.random.seed(seed)
-
-    num_samples = len(y)
-
-    if shuffle:
-        shuffle_indices = np.random.permutation(np.arange(num_samples))
-        shuffled_y = y[shuffle_indices]
-        shuffled_tx = tx[shuffle_indices]
-    else:
-        shuffled_y = y
-        shuffled_tx = tx
-    for batch_num in range(num_batches):
-        start_index = batch_num * batch_size
-        end_index = min((batch_num + 1) * batch_size, num_samples)
-        if start_index != end_index:
-            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
-
-
-def get_accuracy(y_pred, y_true):
-    return sum(y_pred == y_true)/len(y_true)
-
-
-def get_pos_rates(y_pred, y_true):
-    tp = sum(y_pred[y_true == 1] == 1)
-    fp = sum(y_true == 1) - tp
-
-    return tp, fp
-
-
-def get_neg_rates(y_pred, y_true):
-    tn = sum(y_pred[y_true == -1] == -1)
-    fn = sum(y_true == -1) - tn
-
-    return tn, fn
-
-
-def get_f1_score(y_pred, y_true):
-    tp, fp = get_pos_rates(y_pred, y_true)
-    tn, fn = get_neg_rates(y_pred, y_true)
-
-    return tp/(tp + (fp + fn)/2.)
