@@ -20,15 +20,16 @@ plt.rcParams.update({'axes.spines.right': True,
 sns.set_style('whitegrid')
 sns.set_palette(sns.color_palette('colorblind'))
 
+COLOURS = list(sns.color_palette('colorblind'))
 
 def cross_validation_visualization(lambdas, losses_train, losses_test):
     """visualization the curves of mse_tr and mse_te."""
 
-    avg_loss_tr = np.mean(losses_train, axis=1)
-    std_loss_tr = np.std(losses_train, axis=1)
+    avg_loss_tr = np.nanmean(losses_train, axis=1)
+    std_loss_tr = np.nanstd(losses_train, axis=1)
 
-    avg_loss_te = np.mean(losses_test, axis=1)
-    std_loss_te = np.std(losses_train, axis=1)
+    avg_loss_te = np.nanmean(losses_test, axis=1)
+    std_loss_te = np.nanstd(losses_train, axis=1)
 
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.set_xscale('log')
