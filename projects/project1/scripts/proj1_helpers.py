@@ -3,17 +3,23 @@
 import csv
 import numpy as np
 
+from os import path
+
+from data_utils import train_eval_split
+
+SEED = 42
+LABELS = {'b': 0, 's': 1}
 
 def load_csv_data(data_path, sub_sample=False):
-    """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
+    """Loads data and returns y (class labels), input_data (features) and ids (event ids)"""
     y = np.genfromtxt(data_path, delimiter=",", skip_header=1, dtype=str, usecols=1)
     x = np.genfromtxt(data_path, delimiter=",", skip_header=1)
     ids = x[:, 0].astype(np.int)
     input_data = x[:, 2:]
 
-    # convert class labels from strings to binary (-1,1)
+    # convert class labels from strings to binary (0,1)
     yb = np.ones(len(y))
-    yb[np.where(y=='b')] = -1
+    yb[np.where(y == 'b')] = LABELS['b']
     
     # sub-sample
     if sub_sample:
@@ -24,28 +30,53 @@ def load_csv_data(data_path, sub_sample=False):
     return yb, input_data, ids
 
 
-def predict_labels(weights, data):
+def predict_labels(weights, data, thresh=0):
     """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)
-    y_pred[np.where(y_pred <= 0)] = -1
-    y_pred[np.where(y_pred > 0)] = 1
+    y_pred[np.where(y_pred <= thresh)] = LABELS['b']
+    y_pred[np.where(y_pred > thresh)] = 1
     
     return y_pred
 
 
 def create_csv_submission(ids, y_pred, name):
     """
-    Creates an output file in csv format for submission to kaggle
+    Creates an output file in csv format for submission to AICrowd
     Arguments: ids (event ids associated with each prediction)
                y_pred (predicted class labels)
                name (string name of .csv output file to be created)
     """
+    # Re-code to match labels on submission platform
+
+    y_pred[y_pred == LABELS['b']] = -1
     with open(name, 'w') as csvfile:
         fieldnames = ['Id', 'Prediction']
         writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({'Id':int(r1),'Prediction':int(r2)})
+
+
+def load_data(data_path):
+    # Load train data
+    y, x, ids = load_csv_data(path.join(data_path, 'train.csv'))
+
+    # Normalise data
+    x, mean_x, std_x = standardise(x)
+
+    # Split into train and evaluation set
+    (x_train, y_train), (x_eval, y_eval) = train_eval_split(y, x, split_ratio=.7, seed=SEED)
+    tx_train = np.c_[np.ones(len(y_train)), x_train]
+    tx_eval = np.c_[np.ones(len(y_eval)), x_eval]
+
+    # Load test data
+    y_test, x_test, ids_test = load_csv_data(path.join(data_path, 'test.csv'))
+
+    # Don't forget to standardise to same mean and std
+    x_test = standardise_to_fixed(x_test, mean_x, std_x)
+    tx_test = np.c_[np.ones(len(y_test)), x_test]
+
+    return (y_train, x_train, tx_train), (y_eval, x_eval, tx_eval), (y_test, x_test, tx_test, ids_test)
 
 
 def standardise(x):
@@ -92,3 +123,10 @@ def get_f1_score(y_pred, y_true):
     tn, fn = get_neg_rates(y_pred, y_true)
 
     return tp/(tp + (fp + fn)/2.)
+
+
+def eval_model(y, x, w, thresh=0):
+    y_pred = predict_labels(w, x, thresh)
+    acc = get_accuracy(y_pred, y)
+
+    return acc
