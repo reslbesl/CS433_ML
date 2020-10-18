@@ -8,8 +8,7 @@ def compute_loss_mse(y, tx, w):
     """Calculate the MSE loss under weights vector w."""
     e = y - tx.dot(w)
 
-    return e.dot(e)/(2*len(e))
-    # return e.dot(e.T)/(2*len(e)) 
+    return e.dot(e.T)/(2*len(e)) 
 
 
 def compute_gradient_mse(y, tx, w):
