@@ -98,4 +98,4 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=SEED):
         start_index = batch_num * batch_size
         end_index = min((batch_num + 1) * batch_size, num_samples)
         if start_index != end_index:
-            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index], batch_num

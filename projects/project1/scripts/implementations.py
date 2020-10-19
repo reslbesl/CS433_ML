@@ -172,7 +172,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
         # Check termination conditions
         if np.isnan(loss):
             print('Divergence warning: Terminate because loss is NaN.')
-            # Will return loss and weights of last step
             break
 
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:

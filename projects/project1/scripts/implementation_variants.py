@@ -38,7 +38,55 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, verbose=False):
     return w, loss
 
 
-def logistic_regression_SGD(y, tx, initial_w, max_iters, gamma, batch_size=10, threshold=1e-9, verbose=False):
+def logistic_regression_GD(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
+    """
+
+    :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records. Must include a constant offset variable as first feature!
+    ::param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param max_iters: int: scalar value indicating the maximum number of iterations to run
+    :param gamma: float: gradient step-size
+    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
+    :param verbose: bool: whether to print out additional info
+    :return:
+    """
+    # Check correct class label encodings
+    labels = set(y)
+    assert len(labels) == 2, "More than two classes detected. Function implements binary classification only."
+    assert len(labels.difference({0, 1})) == 0, "Class labels must be encoded as {0, 1}"
+
+    # Init
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        # Compute gradient
+        grad = compute_gradient_logreg_mean(y, tx, w)
+
+        # Update model parameters
+        w = w - gamma * grad
+
+        # Compute new loss
+        loss = compute_loss_logreg_mean(y, tx, w)
+        losses.append(loss)
+
+        if verbose:
+            if n_iter % 1000 == 0:
+                print("Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+
+        # Check termination conditions
+        if np.isnan(loss):
+            print('Divergence warning: Terminate because loss is NaN.')
+            break
+
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            print('Loss convergence:Terminate because loss did not change by more than threshold.')
+            break
+
+    return w, losses[-1]
+
+
+def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, threshold=1e-9, verbose=False):
     """
 
     :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
@@ -68,7 +116,7 @@ def logistic_regression_SGD(y, tx, initial_w, max_iters, gamma, batch_size=10, t
         ty = y
 
     # Init
-    w = initial_w
+    w = w_initial
     loss = compute_loss_logreg(ty, tx, w)
     losses = [loss]
 

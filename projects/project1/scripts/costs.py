@@ -49,6 +49,12 @@ def compute_loss_logreg(y, tx, w):
     return np.sum(np.log(1 + np.exp(z)) - y * z)
 
 
+def compute_loss_logreg_mean(y, tx, w):
+    loss = compute_loss_logreg(y, tx, w)
+
+    return loss/len(y)
+
+
 def compute_gradient_logreg(y, tx, w):
     """Compute the gradient of the negative log-likelihood under a logistic regression model  with class labels {0, 1}."""
     assert len(set(y).difference({0., 1.})) == 0, "Class labels must be encoded as {0, 1}"
@@ -57,6 +63,13 @@ def compute_gradient_logreg(y, tx, w):
     grad = tx.T.dot(s)
 
     return grad
+
+
+def compute_gradient_logreg_mean(y, tx, w):
+    grad = compute_gradient_logreg(y, tx, w)
+
+    return grad/len(y)
+
 
 
 def compute_hessian_logreg(tx, w):
