@@ -44,12 +44,9 @@ def compute_loss_logreg(y, tx, w):
     """Compute the loss under a logistic regression model (negative log likelihood) with class labels {0, 1}."""
     assert len(set(y).difference({0., 1.})) == 0, "Class labels must be encoded as {0, 1}"
 
-#     a = np.log(1 + np.exp(tx.dot(w)))
+    z = tx.dot(w)
 
-#     b = -y * tx.dot(w)
-
-#     return a.dot(b)
-    return np.sum(np.log(1+np.exp(tx.dot(w))))-y.T.dot(tx.dot(w))
+    return np.sum(np.log(1 + np.exp(z)) - y * z)
 
 
 def compute_gradient_logreg(y, tx, w):
