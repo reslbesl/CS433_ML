@@ -60,7 +60,7 @@ def ridge_regression(y, x, lambda_):
     w = np.linalg.solve((gram + plambda * eye), x.T.dot(y))
 
     # Compute loss
-    loss = compute_loss_ridge(y, x, w, lambda_)
+    loss = compute_loss_mse(y, x, w)
 
     return w, loss
 
@@ -193,8 +193,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, thresho
         # Update model parameters
         w = w - gamma * grad
 
-        # Compute new loss
-        loss = compute_loss_logreg_reg(y, tx, w, lambda_)
+        # Compute new (non-penalised) loss
+        loss = compute_loss_logreg(y, tx, w)
         losses.append(loss)
 
         if verbose:

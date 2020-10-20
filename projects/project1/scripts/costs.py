@@ -80,10 +80,10 @@ def compute_hessian_logreg(tx, w):
     return tx.T.dot(s).dot(tx)
 
 
-def compute_loss_logreg_reg(y, tx, w, lambda_):
+def compute_loss_logreg_regl2(y, tx, w, lambda_):
     """Compute the loss of the negative log-likelihood under a logistics regression model under L2 regularisation"""
     loss = compute_loss_logreg(y, tx, w)
-    penal_loss = loss + lambda_ / 2 * np.linalg.norm(w)
+    penal_loss = loss + lambda_ / 2 * w.dot(w)
 
     return penal_loss
 
