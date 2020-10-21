@@ -37,7 +37,7 @@ def ridge_regression(y, x, lambda_):
     Normal equations using L2 regularization
 
     :param y: np.array: (n, ): array containing the target variable values of n record
-    :param x: np.array: (n, d): array containing the (normalised) indepent variable values of n records
+    :param x: np.array: (n, d): array containing the (normalised) independent variable values of n records
     :param lambda_: float: penalty parameter
     """
     assert lambda_ > 0, "Penalty factor must be positive."
@@ -65,7 +65,7 @@ def ridge_regression(y, x, lambda_):
     return w, loss
 
 
-def least_squares_GD(y, x, initial_w, max_iters, gamma, verbose=False):
+def least_squares_GD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
     """
     Linear regression using gradient descent
 
@@ -77,11 +77,15 @@ def least_squares_GD(y, x, initial_w, max_iters, gamma, verbose=False):
 
     :return: (w, loss)
     """
-
     assert gamma > 0, "Step size gamma must be positive."
 
+    # Init
     w = initial_w
     loss = compute_loss_mse(y, x, w)
+    losses = [loss]
+
+    if verbose:
+        print("Gradient Descent: Initial loss={l}".format(l=loss))
 
     for n_iter in range(max_iters):
         # Compute gradient
@@ -92,14 +96,25 @@ def least_squares_GD(y, x, initial_w, max_iters, gamma, verbose=False):
 
         # Compute new loss
         loss = compute_loss_mse(y, x, w)
+        losses.append(loss)
 
         if verbose:
-            print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+            if n_iter % 100 == 0:
+                print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+
+        # Check termination conditions
+        if np.isnan(loss):
+            print('Divergence warning: Terminate because loss is NaN.')
+            break
+
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            print('Loss convergence: Terminate because loss did not change by more than threshold.')
+            break
 
     return w, loss
 
 
-def least_squares_SGD(y, x, initial_w, max_iters, gamma, verbose=False):
+def least_squares_SGD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
     """
     Linear regression using stochastic gradient descent with default mini-batch size 1.
 
@@ -115,6 +130,7 @@ def least_squares_SGD(y, x, initial_w, max_iters, gamma, verbose=False):
 
     w = initial_w
     loss = compute_loss_mse(y, x, w)
+    losses = [loss]
 
     for batch_y, batch_tx, n_iter in batch_iter(y, x, batch_size=1, num_batches=max_iters):
 
@@ -122,13 +138,24 @@ def least_squares_SGD(y, x, initial_w, max_iters, gamma, verbose=False):
         grad = compute_gradient_mse(batch_y, batch_tx, w)
 
         # Update model parameters
-        w = w - gamma * grad
+        w -= gamma * grad
 
         # Compute new loss
         loss = compute_loss_mse(y, x, w)
+        losses.append(loss)
 
         if verbose:
-            print("Stochastic GD({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+            if n_iter % 100 == 0:
+                print("Stochastic GD({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+
+        # Check termination conditions
+        if np.isnan(loss):
+            print('Divergence warning: Terminate because loss is NaN.')
+            break
+
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            print('Loss convergence: Terminate because loss did not change by more than threshold.')
+            break
 
     return w, loss
 
@@ -151,22 +178,23 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
     assert len(labels.difference({0, 1})) == 0, "Class labels must be encoded as {0, 1}"
 
     # Init
-    losses = []
     w = initial_w
+    loss = compute_loss_logreg(y, tx, w)
+    losses = [loss]
 
     for n_iter in range(max_iters):
         # Compute gradient
         grad = compute_gradient_logreg(y, tx, w)
 
         # Update model parameters
-        w = w - gamma * grad
+        w -= gamma * grad
 
         # Compute new loss
         loss = compute_loss_logreg(y, tx, w)
         losses.append(loss)
 
         if verbose:
-            if n_iter % 1000 == 0:
+            if n_iter % 100 == 0:
                 print("Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
 
         # Check termination conditions
@@ -178,20 +206,21 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
             print('Loss convergence:Terminate because loss did not change by more than threshold.')
             break
 
-    return w, losses[-1]
+    return w, loss
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, threshold=1e-8, verbose=False):
 
     w = initial_w
-    losses = []
+    loss = compute_loss_logreg(y, tx, w)
+    losses = [loss]
 
     for n_iter in range(max_iters):
         # Compute gradient
-        grad = compute_gradient_logreg_reg(y, tx, w, lambda_)
+        grad = compute_gradient_logreg_regl2(y, tx, w, lambda_)
 
         # Update model parameters
-        w = w - gamma * grad
+        w -= gamma * grad
 
         # Compute new (non-penalised) loss
         loss = compute_loss_logreg(y, tx, w)
@@ -213,6 +242,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, thresho
                 print('Loss convergence:Terminate because loss did not change by more than threshold.')
             break
 
-    return w, losses[-1]
+    return w, loss
 
 
