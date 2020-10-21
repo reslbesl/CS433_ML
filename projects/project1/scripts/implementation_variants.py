@@ -5,7 +5,7 @@ from data_utils import *
 
 
 # Variants
-def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, verbose=False):
+def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, threshold=1e-9, verbose=False):
     """
     Lasso regression using subgradient method
 
@@ -14,6 +14,7 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, verbose=False):
     :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
+    :param lambda_: float: regularisation parameter
 
     :return: (w, loss)
     """
@@ -22,6 +23,7 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, verbose=False):
 
     w = initial_w
     loss = compute_loss_mse(y, tx, w)
+    losses = [loss]
 
     for n_iter in range(max_iters):
         # Compute gradient
@@ -32,58 +34,25 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, verbose=False):
 
         # Compute new loss
         loss = compute_loss_mse(y, tx, w)
-        if verbose:
-            print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
-
-    return w, loss
-
-
-def logistic_regression_GD(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
-    """
-
-    :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
-    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records. Must include a constant offset variable as first feature!
-    ::param initial_w: np.array: (d, ): array containing the initial model parameter values
-    :param max_iters: int: scalar value indicating the maximum number of iterations to run
-    :param gamma: float: gradient step-size
-    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
-    :param verbose: bool: whether to print out additional info
-    :return:
-    """
-    # Check correct class label encodings
-    labels = set(y)
-    assert len(labels) == 2, "More than two classes detected. Function implements binary classification only."
-    assert len(labels.difference({0, 1})) == 0, "Class labels must be encoded as {0, 1}"
-
-    # Init
-    losses = []
-    w = initial_w
-
-    for n_iter in range(max_iters):
-        # Compute gradient
-        grad = compute_gradient_logreg_mean(y, tx, w)
-
-        # Update model parameters
-        w = w - gamma * grad
-
-        # Compute new loss
-        loss = compute_loss_logreg_mean(y, tx, w)
         losses.append(loss)
 
         if verbose:
-            if n_iter % 1000 == 0:
-                print("Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+            if n_iter % 100 == 0:
+                print("Gradient Descent({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
 
         # Check termination conditions
         if np.isnan(loss):
-            print('Divergence warning: Terminate because loss is NaN.')
+            if verbose:
+                print('Divergence warning: Terminate because loss is NaN.')
+            # Will return loss and weights of last step
             break
 
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            print('Loss convergence:Terminate because loss did not change by more than threshold.')
+            if verbose:
+                print('Loss convergence:Terminate because loss did not change by more than threshold.')
             break
 
-    return w, losses[-1]
+    return w, loss
 
 
 def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, threshold=1e-9, verbose=False):
@@ -101,26 +70,14 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
     # Check correct class label encodings
     labels = set(y)
     assert len(labels) == 2, f"{len(labels)} classes detected. Function implements binary classification only."
-
-    if len(labels.difference({1, 0})) > 0:
-        print('Re-code class labels as {0, 1}')
-
-        # Get new class label encodings
-        c = list(labels)
-        c.sort()
-
-        ty = y.copy()
-        ty[ty == c[0]] = 0
-        ty[ty == c[1]] = 1
-    else:
-        ty = y
+    assert len(labels.difference({0, 1})) == 0, "Class labels must be encoded as {0, 1}"
 
     # Init
     w = w_initial
-    loss = compute_loss_logreg(ty, tx, w)
+    loss = compute_loss_logreg(y, tx, w)
     losses = [loss]
 
-    for batch_y, batch_x, n_iter in batch_iter(ty, tx, batch_size, num_batches=max_iters):
+    for batch_y, batch_x, n_iter in batch_iter(y, tx, batch_size, num_batches=max_iters):
         # Compute gradient
         grad = compute_gradient_logreg(batch_y, batch_x, w)
 
@@ -131,6 +88,10 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
         loss = compute_loss_logreg(batch_y, batch_x, w)
         losses.append(loss)
 
+        if verbose:
+            if n_iter % 100 == 0:
+                print("Stochastic Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+
         # Check terminating conditions
         if np.isnan(loss):
             print('Divergence warning: Terminate because loss is NaN.')
@@ -140,11 +101,56 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
 
+    return w, loss
+
+
+def logistic_regression_mean(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
+    """
+
+    :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records. Must include a constant offset variable as first feature!
+    ::param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param max_iters: int: scalar value indicating the maximum number of iterations to run
+    :param gamma: float: gradient step-size
+    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
+    :param verbose: bool: whether to print out additional info
+    :return:
+    """
+    # Check correct class label encodings
+    labels = set(y)
+    assert len(labels) == 2, "More than two classes detected. Function implements binary classification only."
+    assert len(labels.difference({0, 1})) == 0, "Class labels must be encoded as {0, 1}"
+
+    # Init
+    w = initial_w
+    loss = compute_loss_logreg_mean(y, tx, w)
+    losses = [loss]
+
+    for n_iter in range(max_iters):
+        # Compute gradient
+        grad = compute_gradient_logreg_mean(y, tx, w)
+
+        # Update model parameters
+        w -= gamma * grad
+
+        # Compute new loss
+        loss = compute_loss_logreg_mean(y, tx, w)
+        losses.append(loss)
+
         if verbose:
             if n_iter % 100 == 0:
-                print("Stochastic Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
+                print("Gradient Descent ({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
 
-    return w, losses
+        # Check termination conditions
+        if np.isnan(loss):
+            print('Divergence warning: Terminate because loss is NaN.')
+            break
+
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            print('Loss convergence:Terminate because loss did not change by more than threshold.')
+            break
+
+    return w, loss
 
 
 def least_squares_SGD_robbinson(y, tx, initial_w, max_iters, r_gamma=.7, verbose=False):
