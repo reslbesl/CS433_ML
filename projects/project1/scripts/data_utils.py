@@ -99,3 +99,81 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True, seed=SEED):
         end_index = min((batch_num + 1) * batch_size, num_samples)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index], batch_num
+            
+def load_data_split_categorical(data_path, cat):
+    '''
+    Splits data according to the categorical feature "PRI_jet_num" provided as 'cat' argument (cat in range (0,4) ). Performs also some feature removal according
+    to the dataset documentation, based on the value of cat. 
+    '''
+    #LOAD TRAIN DATA
+    s = np.genfromtxt(path.join(data_path,'train.csv'), delimiter=",", skip_header=1)
+    y = np.genfromtxt(path.join(data_path,'train.csv'), delimiter=",", skip_header=1, dtype=str, usecols=1)
+    
+    # convert class labels from strings to binary (0,1)
+    yb = np.ones(len(y))
+    yb[np.where(y == 'b')] = LABELS['b']
+    
+    #insert new column with binary label in s
+    s = np.delete(s,1,axis=1)
+    s = np.insert(s,1,yb,axis=1)
+    
+    #split data set according to the value of PRI_JET_NUM
+    sc = s[np.where(s[:,24]==cat)]
+    y = sc[:,1].astype(np.int)
+    ids = sc[:,0].astype(np.int)
+    x = sc[:, 2:]
+
+    #a bit of feature selection based on cat. Basically removing undefined columns
+    if cat <= 1:
+        if cat == 0:
+            undef_c = [4,5,6,12,22,23,24,25,26,27,28,29]
+        else:
+            undef_c = [4,5,6,12,22,26,27,28]
+    if cat > 1:
+            undef_c = [22]    
+    x = np.delete(x,undef_c,axis=1)
+    
+    #Normalise data
+    x, mean_x, std_x = standardise(x)
+
+    # Split into train and evaluation set
+    (x_train, y_train), (x_eval, y_eval) = train_eval_split(y, x, split_ratio=.7, seed=SEED)
+    tx_train = np.c_[np.ones(len(y_train)), x_train]
+    tx_eval = np.c_[np.ones(len(y_eval)), x_eval]
+
+    #LOAD TEST DATA
+    s = np.genfromtxt(path.join(data_path,'test.csv'), delimiter=",", skip_header=1)
+    y = np.genfromtxt(path.join(data_path,'test.csv'), delimiter=",", skip_header=1, dtype=str, usecols=1)
+    
+    # convert class labels from strings to binary (0,1)
+    yb = np.ones(len(y))
+    yb[np.where(y == 'b')] = LABELS['b']
+    
+    #insert new column with binary label in s
+    s = np.delete(s,1,axis=1)
+    s = np.insert(s,1,yb,axis=1)
+    
+    #split data set according to the value of PRI_JET_NUM
+    sc = s[np.where(s[:,24]==cat)]
+
+    y_test = sc[:,1].astype(np.int)
+    ids_test = sc[:,0].astype(np.int)
+    x_test = sc[:, 2:]
+
+    #a bit of feature selection based on cat. Basically removing undefined columns
+    if cat <= 1:
+        if cat == 0:
+            undef_c = [4,5,6,12,22,23,24,25,26,27,28,29]
+        else:
+            undef_c = [4,5,6,12,22,26,27,28]
+    if cat > 1:
+            undef_c = [22]    
+    x_test = np.delete(x_test,undef_c,axis=1)
+
+    # Don't forget to standardise to same mean and std
+    x_test = standardise_to_fixed(x_test, mean_x, std_x)
+    tx_test = np.c_[np.ones(len(y_test)), x_test]
+
+    return (y_train, x_train, tx_train), (y_eval, x_eval, tx_eval), (y_test, x_test, tx_test, ids_test)
+
+     
