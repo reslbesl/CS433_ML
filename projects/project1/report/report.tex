@@ -79,19 +79,23 @@ In the original dataset, each feature vector $\features$ contained $d=30$ numeri
 
 \parait{Most informative features.} All models were tested on a reduced set of features that only pertained the 20 features with the highest linear correlation with the target variable.
 
-\parait{Undefined features.} $4$ out of the $29$ continuous data features were undefined for a large number of records ($177,457$ of $250,000$ labelled records) with \texttt{PRI\_jet\_num} $\leq 1$~\cite{OpenDataCERN}. In the original data, undefined values (which did not have a physical meaning) were encoded as $-999$. Each model was tested on a dataset with the undefined features removed. 
+\parait{Undefined features.} $7$ out of the $29$ continuous data features were undefined for a large number of records ($177,457$ of $250,000$ labelled records) with \texttt{PRI\_jet\_num} $\leq 1$~\cite{OpenDataCERN}. In the original data, undefined values were encoded as $-999$. We decided not to impute the undefined values as they did not have any defined physical meaning. To avoid, however, that these outlier values skewed the learned model, we tested encoding these with a value closer to zero but still outside the range of defined values. We also assessed performance of a model with all potentially undefined variables removed.\\
+Additionally, all classifiers were tested on a dataset in which the number of jets \texttt{PRI\_jet\_num} was replaced by a binary indicator variable that was $1$ if \texttt{PRI\_jet\_num} $>1$ and $0$ otherwise. Furthermore, three features with a high cross-correlation with other variables that had higher importance were removed as well. 
 
-\parabf{Standardisation.} If not specified otherwise, all data was standardised to the mean and standard deviation (s.d.) of the \emph{current training set}. If cross-validation was applied, the mean and s.d. of the current training set were used to avoid optimism bias~\cite{Domingos2012}. 
+\parabf{Standardisation.} If not specified otherwise, all data was standardised to the mean and standard deviation (s.d.) of the \emph{current training set} before training. If cross-validation was applied, the mean and s.d. of the current training set were used to avoid optimism bias~\cite{Domingos2012}. 
 
+\vspace*{-3.mm}
 \subsection{Classification Methods}
 Formally, the task of this challenge was to find a \emph{binary classification function}
 
+\vspace*{-4mm}
 \begin{equation}
 	f: \mathbb{R}^d \rightarrow \targetset
 \end{equation}
 
 that takes as input a feature vector $\features \in \mathbb{R}^d$ and outputs a guess about the correct label $\target \in \targetset$. To obtain $f$ we run a \emph{training algorithm} $\Train$ on a dataset to obtain a trained classifier
 
+\vspace*{-4mm}
 \begin{equation}
 	\Train: (\Data, \theta) \rightarrow \classifier{\Train}{\Data}
 \end{equation}
@@ -102,6 +106,7 @@ We describe in short the four main training algorithms implemented and tested as
 
 \parabf{$\Baseline$} The $\Baseline$ algorithm extracts relative class frequencies from its training set and given a non-labelled record outputs a random label according to
 
+\vspace*{-4mm}
 \begin{equation}
 	\classifier{\Baseline}{\Data}(\features) = 
 	\begin{cases}
@@ -114,6 +119,7 @@ where $N = |\Data|$ is the size of the classifiers training set and $\pi_b, \pi_
 
 \parabf{$\LeastSquares$} Given a dataset $\Data = (X, \targetvector)$, the linear least-squares algorithm $\LeastSquares$ outputs a model
 
+\vspace*{-4mm}
 \begin{equation}
 	\classifier{\LeastSquares}{\Data}(\features) = g(\features^T \weights_{\LeastSquares})
 \end{equation}
@@ -124,9 +130,11 @@ where $\weights_{\LeastSquares} = (X^T X)^{-1}X^T \targetvector$ is the weights 
 
 \parabf{$\LogReg$} A classifier trained under the logistic regression algorithm $\LogReg$ outputs $\hat{\target} = b$ if $\features^T \weights_{\LogReg} \leq \frac{1}{2}$ and $\hat{\target} = s$ otherwise. The optimal weights vector is found by minimising the negative log-likelihood of the train set under a logistic regression model with
 
+\vspace*{-4mm}
 \begin{equation}
 	\weights_\LogReg = \underset{\weights}{\text{argmin}} \sum_{i=1}^{N} \log [ 1 + \exp(\features^T\weights) ] - \target\features^T\weights
 \end{equation} 
+
 
 \subsection{Evaluation Setup}
 While the original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}, we used a simpler evaluation metric to select the best performing discriminant function. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
@@ -145,6 +153,13 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 
 \section{Results}
 \label{sec:results}
+
+\begin{figure}
+	\includegraphics[width=.5\textwidth]{compare_features_ridge.pdf}
+	\caption{Prediction accuracy across feature sets for a ridge regression model}
+	\vspace*{-5mm}
+	\setlength{\belowcaptionskip}{-10pt}
+\end{figure}
 
 \section{Discussion}
 Say all the things we could have done but didn't do.
