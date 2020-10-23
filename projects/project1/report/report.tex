@@ -149,8 +149,8 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 \label{sec:results}
 
 \begin{figure}
-	\includegraphics[width=.5\textwidth]{compare_features_ridge.pdf}
-	\caption{Prediction accuracy across feature sets for the best performing model $\Ridge$ with $\lambda^* = 10^-8$}
+	\includegraphics[width=.5\textwidth]{compare_features_logreg.pdf}
+	\caption{Prediction accuracy across feature sets for the best performing model $\LogReg$ trained under gradient descent with $\gamma = 0.01$}
 	\label{fig:features}
 	\setlength{\belowcaptionskip}{-10pt}
 \end{figure}
@@ -163,7 +163,7 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 	\vspace*{-5mm}
 \end{figure}
 
-Cross-validation on $\Dtrain$ showed that encoding the number of jets as a binary variable and removing features with high cross-correlations (labelled DeCorrelate in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $71.86\%$ on the raw to $71.98\%$ on the modified dataset under a ridge regression model with $\lambda^* = 10^-8$. Removing uninformative features decreased average classification performance from $71.86\%$ to $70.87\%$.
+Cross-validation on $\Dtrain$ showed that encoding the number of jets as a binary variable and removing features with high cross-correlations (labelled DeCorrelate in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $71.86\%$ on the raw to $71.98\%$ on the modified dataset under a logistic regression model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance from $71.86\%$ to $70.87\%$.
 
 Based on these results, we compared the performance of different model training algorithms on the pre-processed dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=2.9 \cdot 10{-9}$ for ridge regression.\\
 All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $72.51\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy as reported by the challenge platform for this model was $72.7\%$. 
