@@ -36,7 +36,7 @@ def predict_labels(weights, data, thresh=0):
     """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)
     y_pred[np.where(y_pred <= thresh)] = LABELS['b']
-    y_pred[np.where(y_pred > thresh)] = 1
+    y_pred[np.where(y_pred > thresh)] = LABELS['s']
     
     return y_pred
 
