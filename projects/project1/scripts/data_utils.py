@@ -3,6 +3,10 @@
 
 import numpy as np
 
+from os import path
+
+from proj1_helpers import standardise_to_fixed, standardise
+
 SEED = 42
 
 def train_eval_split(y, tx, split_ratio, seed=SEED):

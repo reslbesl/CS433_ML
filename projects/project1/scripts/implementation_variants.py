@@ -74,18 +74,18 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
 
     # Init
     w = w_initial
-    loss = compute_loss_logreg(y, tx, w)
+    loss = compute_loss_logreg_mean(y, tx, w)
     losses = [loss]
 
     for batch_y, batch_x, n_iter in batch_iter(y, tx, batch_size, num_batches=max_iters):
         # Compute gradient
-        grad = compute_gradient_logreg(batch_y, batch_x, w)
+        grad = compute_gradient_logreg_mean(batch_y, batch_x, w)
 
         # Update model parameters
         w = w - gamma * grad
 
         # Compute new loss
-        loss = compute_loss_logreg(batch_y, batch_x, w)
+        loss = compute_loss_logreg_mean(batch_y, batch_x, w)
         losses.append(loss)
 
         if verbose:
@@ -96,9 +96,6 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
         if np.isnan(loss):
             print('Divergence warning: Terminate because loss is NaN.')
             # Will return loss and weights of last step
-            break
-
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
 
     return w, loss

@@ -61,7 +61,7 @@ This short report summarises our attempt to build a robust and accurate predicti
 \section{Introduction}
 
 The discovery of the Higgs boson at the Large Hadron Collider (LHC) at CERN in 2012~\cite{Aad2012} ended the hunt for the "God particle" which lasted for nearly 50 years, from Peter Higg's first publication that predicted its existence~\cite{Higgs1964} to the official confirmation by CERN scientists in 2013~\cite{CERN}.\\
-One of the many challenges the team of scientists at the LHC had to overcome is that one can never directly observe a Higgs boson. The Higgs boson, like most particle types, is unstable and, immediately after being produced, undergoes a process called particle decay. This means that instead of searching for the particle itself, the CERN scientists conducted an endless number of experiments to identify the unique traces of its \emph{decay}. However, as collisions of protons produce a whole host of unstable particles, finding the \emph{decay} signature" of the Higgs boson is a challenging classification task.\\
+One of the many challenges the team of scientists at the LHC had to overcome is that one can never directly observe a Higgs boson. The Higgs boson, like most particle types, is unstable and, immediately after being produced, undergoes a process called particle decay. However, as collisions of protons produce a whole host of unstable particles, finding the unique \emph{decay signature} of the Higgs boson is a challenging classification task.\\
 In this short report, we describe an (amateur's) attempt to reproduce the uniquely fascinating search for the Higgs boson.
 
 \subsection{Task Description}
@@ -126,19 +126,20 @@ where $N = |\Data|$ is the size of the classifiers training set and $\pi_b, \pi_
 
 where $\weights_{\LeastSquares} = (X^T X)^{-1}X^T \targetvector$ is the weights vector that minimises the mean squared error (MSE) between true and predicted labels in the train set $\Data$ and $g$ is a threshold function that outputs $\hat{\target} = b$ if $\features^T \weights_{\LeastSquares} \leq 0$ and $\hat{\target} = s$ otherwise.
 
-\parabf{$\Ridge$} The ridge regression algorithm $\Ridge$ is a variant of least-squares training in which the optimal weights vector is additionally constrained to minimise the $L_2$ norm of the weights vector $||\weights||_2^2$ with $\weights_\Ridge = (X^T X + 2N\lambda I)^{-1}X^T \targetvector$. $\lambda$ is a training hyperparameter that controls the trade-off between finding the optimal MSE and parameter shrinkage to avoid overfitting to the train set.
+\parabf{$\Ridge$} The ridge regression algorithm $\Ridge$ is a variant of least-squares training in which the optimal weights vector is additionally constrained to minimise the $L_2$ norm of the weights vector $||\weights||_2^2$ with $\weights_\Ridge = (X^T X + 2N\lambda I)^{-1}X^T \targetvector$. $\lambda$ is a training hyperparameter that controls the trade-off between finding the optimal MSE and parameter shrinkage.
 
-\parabf{$\LogReg$} A classifier trained under the logistic regression algorithm $\LogReg$ outputs $\hat{\target} = b$ if $\features^T \weights_{\LogReg} \leq \frac{1}{2}$ and $\hat{\target} = s$ otherwise. The optimal weights vector is found by minimising the negative log-likelihood of the train set under a logistic regression model with
+\parabf{$\LogReg$} A classifier trained under the logistic regression algorithm $\LogReg$ outputs $\hat{\target} = b$ if $\features^T \weights_{\LogReg} \leq \frac{1}{2}$ and $\hat{\target} = s$ otherwise. The optimal weights vector is found by minimising the negative log-likelihood (NLL) of the train set under a logistic regression model with
 
 \vspace*{-4mm}
 \begin{equation}
 	\weights_\LogReg = \underset{\weights}{\text{argmin}} \sum_{i=1}^{N} \log [ 1 + \exp(\features^T\weights) ] - \target\features^T\weights
 \end{equation} 
 
+We implemented traditional gradient descent on a variant of the NLL loss function that was \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size.
 
 \subsection{Evaluation Setup}
 While the original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}, we used a simpler evaluation metric to select the best performing discriminant function. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
-The prediction accuracy over a test set $\Dtest = (\Xtest, \ytest)$ is defined as
+The prediction accuracy over a test set $\Dtest$ is defined as
 \begin{equation}
 	\mathtt{Accuracy} = \underset{\Dtest}{\mathbb{E}}[ \mathbbm{1}_{\target = \hat{\target}} ]
 \end{equation}
@@ -156,10 +157,15 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 
 \begin{figure}
 	\includegraphics[width=.5\textwidth]{compare_features_ridge.pdf}
-	\caption{Prediction accuracy across feature sets for a ridge regression model}
+	\caption{Prediction accuracy across feature sets for the best performing model $\Ridge$ with $\lambda^* = 10^-8$}
+	\label{fig:features}
 	\vspace*{-5mm}
 	\setlength{\belowcaptionskip}{-10pt}
 \end{figure}
+
+Cross-validation on $\Dtrain$ showed that encoding the number of jets as a binary variable and removing features with high cross-correlations (labelled Indicator in \autoref{fig:features}) yielded the accuracy across all classifiers. 
+
+
 
 \section{Discussion}
 Say all the things we could have done but didn't do.

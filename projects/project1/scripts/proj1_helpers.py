@@ -9,6 +9,8 @@ from data_utils import train_eval_split
 
 SEED = 42
 LABELS = {'b': 0, 's': 1}
+PRI_JET_NUM_IDX = 22
+
 
 def load_csv_data(data_path, sub_sample=False):
     """Loads data and returns y (class labels), input_data (features) and ids (event ids)"""
@@ -61,19 +63,20 @@ def load_data(data_path):
     # Load train data
     y, x, ids = load_csv_data(path.join(data_path, 'train.csv'))
 
-    # Normalise data
-    x, mean_x, std_x = standardise(x)
-
     # Split into train and evaluation set
     (x_train, y_train), (x_eval, y_eval) = train_eval_split(y, x, split_ratio=.7, seed=SEED)
-    tx_train = np.c_[np.ones(len(y_train)), x_train]
-    tx_eval = np.c_[np.ones(len(y_eval)), x_eval]
 
     # Load test data
     y_test, x_test, ids_test = load_csv_data(path.join(data_path, 'test.csv'))
 
-    # Don't forget to standardise to same mean and std
-    x_test = standardise_to_fixed(x_test, mean_x, std_x)
+    # Standardise to training set mean
+    x_train, mu, sigma = standardise(x_train)
+    x_eval = standardise_to_fixed(x_eval, mu, sigma)
+    x_test = standardise_to_fixed(x_test, mu, sigma)
+
+    # Generate x tilde
+    tx_train = np.c_[np.ones(len(y_train)), x_train]
+    tx_eval = np.c_[np.ones(len(y_eval)), x_eval]
     tx_test = np.c_[np.ones(len(y_test)), x_test]
 
     return (y_train, x_train, tx_train), (y_eval, x_eval, tx_eval), (y_test, x_test, tx_test, ids_test)
