@@ -5,9 +5,19 @@ import numpy as np
 
 from os import path
 
-from proj1_helpers import standardise_to_fixed, standardise
+from proj1_helpers import *
 
 SEED = 42
+
+FEATURE_NAMES = ['DER_mass_MMC', 'DER_mass_transverse_met_lep', 'DER_mass_vis', 'DER_pt_h', 'DER_deltaeta_jet_jet',
+                 'DER_mass_jet_jet', 'DER_prodeta_jet_jet', 'DER_deltar_tau_lep', 'DER_pt_tot', 'DER_sum_pt',
+                 'DER_pt_ratio_lep_tau', 'DER_met_phi_centrality', 'DER_lep_eta_centrality', 'PRI_tau_pt', 'PRI_tau_eta',
+                 'PRI_tau_phi', 'PRI_lep_pt', 'PRI_lep_eta', 'PRI_lep_phi', 'PRI_met', 'PRI_met_phi', 'PRI_met_sumet',
+                 'PRI_jet_num', 'PRI_jet_leading_pt', 'PRI_jet_leading_eta', 'PRI_jet_leading_phi', 'PRI_jet_subleading_pt',
+                 'PRI_jet_subleading_eta', 'PRI_jet_subleading_phi', 'PRI_jet_all_pt']
+
+JET_NUM_IDX = FEATURE_NAMES.index('PRI_jet_num')
+
 
 def train_eval_split(y, tx, split_ratio, seed=SEED):
     """
@@ -179,5 +189,25 @@ def load_data_split_categorical(data_path, cat):
     tx_test = np.c_[np.ones(len(y_test)), x_test]
 
     return (y_train, x_train, tx_train), (y_eval, x_eval, tx_eval), (y_test, x_test, tx_test, ids_test)
+
+
+def generate_mask(features_to_remove):
+    feat_idx = [FEATURE_NAMES.index(f) for f in features_to_remove]
+    mask = np.ones(len(FEATURE_NAMES)).astype(bool)
+    mask[feat_idx] = False
+
+    return mask
+
+
+def feature_transform(x):
+    x_ind = (x[:, JET_NUM_IDX] > 1).astype(int)
+    x = np.concatenate([x, np.expand_dims(x_ind, axis=1)], axis=1)
+
+    features = generate_mask(['DER_deltaeta_jet_jet', 'DER_prodeta_jet_jet'])
+    features = np.concatenate([features, [True]])
+
+    x = x[:, features]
+
+    return x
 
      
