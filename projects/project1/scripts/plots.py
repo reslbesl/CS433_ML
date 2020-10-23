@@ -33,7 +33,7 @@ def cross_validation_visualization(lambdas, losses_train, losses_test):
     avg_loss_te = np.nanmean(losses_test, axis=1)
     std_loss_te = np.nanstd(losses_train, axis=1)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 4))
     ax.set_xscale('log')
 
     ax.errorbar(lambdas, avg_loss_tr, yerr=std_loss_tr, marker="^", label='$\mathtt{Train}$')
@@ -47,7 +47,7 @@ def cross_validation_visualization(lambdas, losses_train, losses_test):
 
 
 def model_comparison_visualization(accuracy, labels, acc_baseline):
-    fig, ax = plt.subplots(figsize=(10,6))
+    fig, ax = plt.subplots(figsize=(10, 4))
 
     ax.barh([i for i in range(len(accuracy))], accuracy)
     ax.vlines(acc_baseline, *ax.get_ylim(), colors=COLOURS[1], linestyle='--', linewidth=2.5)
