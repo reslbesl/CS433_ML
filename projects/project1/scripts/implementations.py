@@ -74,7 +74,7 @@ def least_squares_GD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose=
 
     :param y: np.array: (n, ): array containing the target variable values of n record
     :param x: np.array: (n, d): array containing the (normalised) independent variable values of n records
-    :param initial_w: np.array: (d, ): array containing the initial modeo parameter values
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
 
