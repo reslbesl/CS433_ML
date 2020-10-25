@@ -11,7 +11,7 @@ def least_squares(y, x):
     """
     Least-squares regression using normal equations
 
-    Takes as input a dataset (y, tx) and finds the weights vector w
+    Takes as input a dataset (y, x) and finds the weights vector w
     that is the solution to the least-squares problem (X^T * X) * w = X^T * y
 
     :param y: np.array: (n, ): array containing the target variable values of n record
