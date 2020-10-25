@@ -173,7 +173,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
     :param gamma: float: gradient step-size
     :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
     :param verbose: bool: whether to print out additional info
-    :return:
+    
+    :return: (w, loss)
     """
     # Check correct class label encodings
     labels = set(y)
