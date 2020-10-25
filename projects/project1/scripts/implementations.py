@@ -168,7 +168,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
 
     :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
     :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records. Must include a constant offset variable as first feature!
-    ::param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
     :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
@@ -214,7 +214,20 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verb
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, threshold=1e-8, verbose=False):
+    """
 
+    :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
+    :param tx: np.array: (n, d): array containing the (normalised) independent variable values of n records. Must include a constant offset variable as first feature!
+    :param initial_w: np.array: (d, ): array containing the initial model parameter values
+    :param max_iters: int: scalar value indicating the maximum number of iterations to run
+    :param gamma: float: gradient step-size
+    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
+    :param verbose: bool: whether to print out additional info
+    :param lambda_: float: penalty parameter
+    
+    :return: (w, loss)
+    """
+    
     w = initial_w
     loss = compute_loss_logreg(y, tx, w)
     losses = [loss]
