@@ -39,6 +39,9 @@ def ridge_regression(y, x, lambda_):
     :param y: np.array: (n, ): array containing the target variable values of n record
     :param x: np.array: (n, d): array containing the (normalised) independent variable values of n records
     :param lambda_: float: penalty parameter
+    
+    
+    :return: (w, loss)
     """
     assert lambda_ > 0, "Penalty factor must be positive."
 
