@@ -51,7 +51,7 @@ if __name__ == "__main__":
     fx_test = standardise_to_fixed(fx_test, mu_train, sigma_train)
 
     # Add offset term
-    tx_test = np.c_[np.ones(fx_test.shape[0]), fx_test]
+    tx_test = np.c_[np.zeros(fx_test.shape[0]), fx_test]
 
     # Get predictions on test set
     y_pred = predict_labels(w, tx_test, thresh=0.5)
