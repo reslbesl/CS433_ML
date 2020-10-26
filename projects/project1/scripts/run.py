@@ -12,9 +12,9 @@ SEED = 42
 DATA_PATH = path.join(cwd, '../data/')
 
 # Training hyperparameters (obtained through procedure in Run.ipynb)
-MAX_ITERS = 50000
+MAX_ITERS = 20000
 GAMMA = 0.01
-THRESHOLD = 1e-7
+THRESHOLD = 1e-6
 
 if __name__ == "__main__":
     print('Load train data...')
