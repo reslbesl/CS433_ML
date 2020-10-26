@@ -19,7 +19,12 @@ To re-generate the submission in `final_submisison.csv` run
 
 ```python run.py``` 
 
+The script expects two files `train.csv` and `test.csv` to be in a folder called `data` that is in the same parent directory as `run.py`.
+
 The notebook `Run.ipynb` contains all experiments described in the final project report. In addition, it contains results for some models not described in detail in the report.
+
+The notebook `Data Exploration.ipynb` contains a quick exploration of the data.
+It was used to select the least informative features with the lowest linear correlation with the target variable hard-coded as `LEAST_INFO` in `data_utils.py`.
 
 ### Models
 
