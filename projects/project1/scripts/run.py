@@ -9,7 +9,7 @@ from implementation_variants import logistic_regression_mean
 cwd = path.dirname(__file__)
 
 SEED = 42
-DATA_PATH = '../data/'
+DATA_PATH = path.join(cwd, '../data/')
 
 # Training hyperparameters (obtained through procedure in Run.ipynb)
 MAX_ITERS = 50000
