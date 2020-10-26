@@ -32,7 +32,7 @@ if __name__ == "__main__":
     tx_train = np.c_[np.ones(len(y_train)), fx_train]
 
     # Initialise training
-    w_initial = np.ones(tx_train.shape[1])
+    w_initial = np.zeros(tx_train.shape[1])
 
     print('Run LogReg gradient descent..')
     # Run gradient descent
