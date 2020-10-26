@@ -2,8 +2,8 @@ import numpy as np
 
 from os import path
 
-from proj1_helpers import load_csv_data, eval_model, predict_labels, create_csv_submission
-from data_utils import feature_transform, standardise, standardise_to_fixed
+from utils import load_csv_data, eval_model, predict_labels, create_csv_submission
+from data_utils import feature_transform_jetnum, standardise, standardise_to_fixed
 from implementation_variants import logistic_regression_mean
 
 cwd = path.dirname(__file__)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     y_train, x_train, _ = load_csv_data(path.join(DATA_PATH, 'train.csv'))
 
     # Apply feature transform
-    fx_train = feature_transform(x_train)
+    fx_train = feature_transform_jetnum(x_train)
 
     # Standardise to mean and s.d.
     fx_train, mu_train, sigma_train = standardise(fx_train)
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # Load test data
     y_test, x_test, ids_test = load_csv_data(path.join(DATA_PATH, 'test.csv'))
-    fx_test = feature_transform(x_test)
+    fx_test = feature_transform_jetnum(x_test)
 
     # Standardise to mean and s.d. of training data
     fx_test = standardise_to_fixed(fx_test, mu_train, sigma_train)

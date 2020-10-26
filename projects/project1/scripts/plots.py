@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd # Only needed for plotting reasons
 
 plt.rcParams.update({'axes.spines.right': True,
                      'axes.spines.top': True,
@@ -54,5 +55,22 @@ def model_comparison_visualization(accuracy, labels, acc_baseline):
 
     ax.set(xlabel='$\mathtt{Accuracy}$',
            yticks=[i for i in range(len(labels))], yticklabels=labels)
+
+    return fig
+
+
+def compare_features_visualisation(acc_train, acc_test, labels, model):
+    arr_train = acc_train.flatten()
+    arr_test = acc_test.flatten()
+
+    arr_features = np.concatenate([np.repeat(labels, acc_train.shape[1]), np.repeat(labels, acc_train.shape[1])])
+    arr_labels = np.concatenate([np.repeat('Train', len(arr_train)), np.repeat('Test', len(arr_test))])
+    arr_acc = np.concatenate([arr_train, arr_test])
+
+    plt_data = pd.DataFrame({'Feature Set':arr_features, 'Accuracy':arr_acc, 'Set':arr_labels})
+
+    fig, ax = plt.subplots(figsize=(8,3.5))
+    ax = sns.boxplot(x='Feature Set', y='Accuracy', hue='Set', data=plt_data)
+    ax.set(ylabel='$\mathtt{Accuracy}$', title=f'{model}')
 
     return fig

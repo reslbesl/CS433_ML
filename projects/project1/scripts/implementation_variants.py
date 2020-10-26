@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+""" Variants of implementations of main discriminant functions"""
+
 import numpy as np
 
-from costs import *
-from data_utils import *
-
+from costs import compute_loss_mse, compute_gradient_lasso, compute_loss_logreg_mean, compute_gradient_logreg_mean, compute_gradient_mse
+from utils import batch_iter
 
 # Variants
 def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, threshold=1e-9, verbose=False):
@@ -16,7 +18,8 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, threshold=1e-9, verbos
     :param gamma: float: gradient step-size
     :param lambda_: float: regularisation parameter
 
-    :return: (w, loss)
+    :return w: np.array: (d, ): array containing the model weights w that minimise the MSE loss
+    :return loss: float: mean-squared error under w
     """
 
     assert gamma > 0, "Step size gamma must be positive."
@@ -55,7 +58,7 @@ def lasso_GD(y, tx, initial_w, max_iters, gamma, lambda_, threshold=1e-9, verbos
     return w, loss
 
 
-def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, threshold=1e-9, verbose=False):
+def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, verbose=False):
     """
 
     :param y: np.array: (n, ): array containing the binary class labels of n records. Class labels must be encoded as {0, 1}!
@@ -63,9 +66,10 @@ def logistic_regression_SGD(y, tx, w_initial, max_iters, gamma, batch_size=10, t
     ::param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
-    :param threshold:
     :param verbose:
-    :return:
+
+    :return w: np.array: (d, ): array containing the model weights w that minimise the negative log-likelihood loss
+    :return loss: float: negative log-likelihood under a logistic regression model with weights w
     """
     # Check correct class label encodings
     labels = set(y)
@@ -111,7 +115,9 @@ def logistic_regression_mean(y, tx, initial_w, max_iters, gamma, threshold=1e-9,
     :param gamma: float: gradient step-size
     :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
     :param verbose: bool: whether to print out additional info
-    :return:
+
+    :return w: np.array: (d, ): array containing the model weights w that minimise the negative log-likelihood loss
+    :return loss: float: negative log-likelihood under a logistic regression model with weights w
     """
     # Check correct class label encodings
     labels = set(y)

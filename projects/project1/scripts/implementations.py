@@ -3,8 +3,8 @@
 
 import numpy as np
 
-from data_utils import *
-from costs import *
+from costs import compute_loss_mse, compute_gradient_mse, compute_loss_logreg, compute_gradient_logreg_regl2
+from utils import batch_iter
 
 
 def least_squares(y, tx):
@@ -77,6 +77,8 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verbose
     :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
+    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
+    :param verbose: bool: whether to print out additional info
 
     :return w: np.array: (d, ): array containing the model weights w that minimise the MSE loss
     :return loss: float: mean-squared error under w
@@ -127,6 +129,8 @@ def least_squares_SGD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose
     :param initial_w: np.array: (d, ): array containing the initial model parameter values
     :param max_iters: int: scalar value indicating the maximum number of iterations to run
     :param gamma: float: gradient step-size
+    :param threshold: float: defines termination condition based on delta in loss from step k to k+1 being smaller
+    :param verbose: bool: whether to print out additional info
 
     :return w: np.array: (d, ): array containing the model weights w that minimise the MSE loss
     :return loss: float: mean-squared error under w
