@@ -209,5 +209,14 @@ def feature_transform(x):
     x = x[:, features]
 
     return x
+ 
+def poly_augmentation(x, degree):
+  aug = np.hstack(x).reshape(x.shape[0],x.shape[1])
+  for i in range(2,degree+1):
+    aug = np.hstack((aug,x**i))
+  return aug
+
+
+  
 
      
