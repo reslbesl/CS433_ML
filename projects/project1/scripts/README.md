@@ -40,6 +40,13 @@ The following models are implemented in `implementations.py`:
 - `logistic_regression` : applies the GD algorithm trying to minimize the loss function, computed as negative Log Likelihood (NNL).
 It takes the same parameters as 'least_squares_GD'. Additionally it checks whether the provided input 'y' is a binary set of labels 
 {1;0}.
+- `logistic_regression`: applies the GD algorithm to minimize the NNL under L2 regularization. It takes the same parameters as 'logistic_regression', plus the penalization parameter 'lambda_'.
+
+Furthermore there are some variants to the standard implementations of the mentioned models. There are defined in `implementation_variants.py`:
+- `lasso_GD` : implements GD under Lasso regularization. That is, penalizing the norm 1 of the vector 'w'. See 'ridge_regression' for details.
+- `logistic_regression_SGD` : Applies SGD to the 'logistic_regression' model. Contrary to the 'least_squares_SGD', the loss function is NNL. See 'least_squares_SGD' for details.
+- `logistic_regression_mean` : variant of 'logistic_regression' where loss and gradient value are normalized to the size of the training set. See 'logistic_regression' for detail
+- `least_squares_SGD_robbinson` : variant of 'least_squares_SGD' using a non-costant step size for Gradiant Descent which decrease at each step. The hyperparameter defining the stepsize is 'r_gamma', and it must be in range [0.5,1]. See 'least_squares_SGD' for details.
 
 ### Experiment setup
 
