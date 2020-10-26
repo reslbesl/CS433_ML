@@ -119,7 +119,7 @@ where $\weights_{\LeastSquares} = (X^T X)^{-1}X^T \targetvector$ is the weights 
 	\weights_\LogReg = \underset{\weights}{\text{argmin}} \sum_{i=1}^{N} \log [ 1 + \exp(\features^T\weights) ] - \target\features^T\weights
 \end{equation} 
 
-We implemented traditional gradient descent on a variant of the NLL loss function that was \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size.
+We implemented gradient descent (GD) on a variant of the NLL loss that is \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size. GD was initialised with a weights vector of all $1$s.
 
 \subsection{Evaluation Setup}
 The original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}. We used a simpler evaluation metric to select the best performing model. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
