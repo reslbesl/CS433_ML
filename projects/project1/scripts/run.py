@@ -17,9 +17,11 @@ GAMMA = 0.01
 THRESHOLD = 1e-7
 
 if __name__ == "__main__":
+    print('Load train data...')
     # Load train data
     y_train, x_train, _ = load_csv_data(path.join(DATA_PATH, 'train.csv'))
 
+    print('Apply feature transform...')
     # Apply feature transform
     fx_train = feature_transform_polybasis(x_train)
 
@@ -32,6 +34,7 @@ if __name__ == "__main__":
     # Initialise training
     w_initial = np.ones(tx_train.shape[1])
 
+    print('Run LogReg gradient descent..')
     # Run gradient descent
     w, loss = logistic_regression_mean(y_train, tx_train, w_initial, MAX_ITERS, GAMMA, verbose=True)
     print(f'Training loss: {loss}')
@@ -39,6 +42,7 @@ if __name__ == "__main__":
     acc = eval_model(y_train, tx_train, w, thresh=0.5)
     print(f'Training accuracy: {acc}')
 
+    print('Load test data...')
     # Load test data
     y_test, x_test, ids_test = load_csv_data(path.join(DATA_PATH, 'test.csv'))
     fx_test = feature_transform_polybasis(x_test)
@@ -51,7 +55,7 @@ if __name__ == "__main__":
 
     # Get predictions on test set
     y_pred = predict_labels(w, tx_test, thresh=0.5)
-    create_csv_submission(ids_test, y_pred, path.join(DATA_PATH, 'final_submission.csv'))
+    create_csv_submission(ids_test, y_pred, 'final_submission.csv')
 
 
 
