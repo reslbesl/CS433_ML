@@ -8,7 +8,7 @@ This repository contains all code used in the Project 1 of the Fall 2020 Machine
 The code is structured in the following way:
 
 - `implementations.py` contains implementations of the main functions required for Project 1 (see [project description](https://raw.githubusercontent.com/epfml/ML_course/master/projects/project1/project1_description.pdf)).
-- `implementation_variants.py` contains variants of the main models such as, for instance, a lasso regression model under subgradient descent, 
+- `implementation_variants.py` contains variants of the main models such as, for instance, a lasso regression model under subgradient descent.
 - `costs.py` contains implementations of various common cost functions. This file contains dependencies for `implementations.py`.
 - `data_utils.py` contains helper functions for transforming and pre-processing data. This file contains dependencies for `implementations.py`.
 - `utils.py` contains helper functions for model training and selection, such as data splitting and test data generation.
@@ -18,6 +18,16 @@ The code is structured in the following way:
 To re-generate the submission in `final_submisison.csv` run
 
 ```python run.py``` 
+
+### Models
+
+Describe models in `implementations.py` and `implementation_variants.py`
+Needs to include: high-level description of the loss function, the optimisation method, additional parameters (for instance, terminating condition for GD methods)
+
+### Experiment setup
+
+Describe how functions in `utils.py` and `data_utils.py` can be used to test different models on features (cross-val and splitting)  
+
 
 
 
