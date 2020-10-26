@@ -60,11 +60,10 @@ This short report summarises our attempt to build a robust and accurate predicti
 
 \section{Introduction}
 
-The discovery of the Higgs boson~\cite{Higgs1964} at the Large Hadron Collider (LHC) in 2012~\cite{Aad2012} ended the hunt for the "God particle" which lasted for nearly 50 years~\cite{CERN}. One of the many challenges the team of scientists at the LHC had to overcome is that one can never directly observe a Higgs boson. The Higgs boson, like most particle types, is unstable and, immediately after being produced, undergoes a process called particle decay. However, as collisions of protons produce a whole host of unstable particles, finding the unique \emph{decay signature} of the Higgs boson is a challenging classification task.\\
-In this short report, we describe our attempt to reproduce the uniquely fascinating search for the Higgs boson.
+The discovery of the Higgs boson~\cite{Higgs1964} at the Large Hadron Collider (LHC) in 2012~\cite{Aad2012} ended the hunt for the "God particle" that lasted for nearly 50 years~\cite{CERN}. A main challenge the scientists at the LHC had to overcome is that one can never directly observe a Higgs boson. The Higgs boson, like most particles, is unstable and, immediately after being produced, undergoes a process called particle decay. However, as collisions of protons produce a whole host of unstable particles, finding the unique \emph{decay signature} of the Higgs boson is a challenging classification task.
 
 \subsection{Task Description}
-Given access to an open-source dataset containing the decay signatures of collision events, we attempted to build an accurate and robust prediction model to distinguish the Higgs boson's decay trace from other particles. The goal of this project was to explore different classification methods, feature engineering and selection techniques in the context of a real-world machine learning task. 
+In this short report, we describe our attempt to reproduce the search for the Higgs boson. Given access to an open-source dataset containing the decay signatures of collision events, we attempted to build an accurate and robust prediction model to distinguish the Higgs boson's decay trace from other particles.
 
 \section{Background}
 
@@ -74,26 +73,19 @@ The data provided comprised 250,000 labelled training examples and 568,238 unlab
 We denote as $\Data = (X, \targetvector)$ a dataset where $X \in \mathbb{R}^{N \times D}$ is a matrix with the $i$-th row containing the $D$-dimensional feature vector $\features^T$ of the $i$-the record and $\targetvector$ is a column vector that contains the labels $\target \in \targetset$ of all $N$ records.       
 In the original dataset, each feature vector $\features$ contained $d=30$ numerical features of which $29$ were continuous and $1$ discrete.  
 
-\parabf{Feature selection.} \autoref{sec:results} presents experimental results on the classification performance of different models across different feature sets. Here, we describe in short the different feature selection and processing strategies that were tested.
+\parabf{Feature selection.} \autoref{sec:results} presents experimental results on the classification performance across different feature sets. Here, we describe in short the different feature engineering strategies that were tested.
 
-\parait{Most informative features.} All models were tested on a reduced set of features that only pertained the 20 features with the highest linear correlation with the target variable.
+\parait{MostInfo.} All models were tested on a reduced set of features that only pertained the 20 features with the highest linear correlation with the target variable.
 
-\parait{Undefined features.} $7$ out of the $29$ continuous data features were undefined for a large number of records ($177,457$ of $250,000$ labelled records) with \texttt{PRI\_jet\_num} $\leq 1$~\cite{OpenDataCERN}. In the original data, undefined values were encoded as $-999$. We decided not to impute the undefined values as they did not have any defined physical meaning. To avoid, however, that these outlier values skewed the learned model, we tested encoding these with a value closer to zero but still outside the range of defined values.\\
-Additionally, we tested a dataset in which the number of jets \texttt{PRI\_jet\_num} was replaced by a binary indicator variable that was $1$ if \texttt{PRI\_jet\_num} $>1$ and $0$ otherwise to reduce redundant information encoding. Three features with a high cross-correlation with other variables that had higher importance were removed from this set as well.
+\parait{ImputeJet.} $7$ out of the $29$ continuous data features were undefined for a large number of records ($177,457$ of $250,000$ labelled records) with \texttt{PRI\_jet\_num} $\leq 1$~\cite{OpenDataCERN}. In the original data, undefined values were encoded as $-999$. We ran all models on a dataset in which undefined value where imputed with the mean of defined values to avoid a potential skew of weights towards these outliers.
+
+\parait{ExpandPoly.} To enable non-linear classification boundaries, we tested a polynomial basis expansion of the data with up to a maximum degree of $4$.
 
 \parabf{Standardisation.} If not specified otherwise, all data was standardised to the mean and standard deviation (s.d.) of the \emph{current training set} before training. If cross-validation was applied, the mean and s.d. of the current training set were used to avoid optimism bias~\cite{Domingos2012}. 
 
-\vspace*{-3.mm}
+\vspace*{-2mm}
 \subsection{Classification Methods}
-Formally, the task of this challenge was to find a \emph{binary classification function}
-
-\vspace*{-4mm}
-\begin{equation}
-	f: \mathbb{R}^d \rightarrow \targetset
-\end{equation}
-
-that takes as input a feature vector $\features \in \mathbb{R}^d$ and outputs a guess about the correct label $\target \in \targetset$. To obtain $f$ we run a \emph{training algorithm} $\Train: (\Data, \theta) \rightarrow \classifier{\Train}{\Data}$ on a dataset $\Data$ to obtain a trained classifier $\classifier{\Train}{\Data}$ where $\theta$ is a set of training hyperparameters.\\
-
+Formally, the task of this challenge was to find a \emph{binary classification function} $f: \mathbb{R}^d \rightarrow \targetset$ that takes as input a feature vector $\features \in \mathbb{R}^d$ and outputs a guess about the correct label $\hat{\target} \in \targetset$. To obtain $f$ we run a \emph{training algorithm} $\Train: (\Data, \theta) \rightarrow \classifier{\Train}{\Data}$ on a dataset $\Data$ to obtain a trained classifier $\classifier{\Train}{\Data}$ where $\theta$ is a set of training hyperparameters.\\
 We describe in short the four main training algorithms implemented and tested as part of this project.
 
 \parabf{$\Baseline$} The $\Baseline$ algorithm extracts relative class frequencies from its training set and given a non-labelled record outputs a random label according to
@@ -130,7 +122,7 @@ where $\weights_{\LeastSquares} = (X^T X)^{-1}X^T \targetvector$ is the weights 
 We implemented traditional gradient descent on a variant of the NLL loss function that was \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size.
 
 \subsection{Evaluation Setup}
-The original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}. We used a simpler evaluation metric to select the best performing discriminant function. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
+The original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}. We used a simpler evaluation metric to select the best performing model. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
 The prediction accuracy over a test set $\Dtest$ is defined as
 \begin{equation}
 	\mathtt{Accuracy} = \underset{\Dtest}{\mathbb{E}}[ \mathbbm{1}_{\target = \hat{\target}} ]
@@ -163,15 +155,16 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 	\vspace*{-5mm}
 \end{figure}
 
-Cross-validation on $\Dtrain$ showed that encoding the number of jets as a binary variable and removing features with high cross-correlations (labelled DeCorrelate in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $71.86\%$ on the raw to $71.98\%$ on the modified dataset under a logistic regression model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance from $71.86\%$ to $70.87\%$.
+Cross-validation on $\Dtrain$ showed that expanding the dataset with a polynomial basis with maximum degree $4$ (labelled $\mathtt{ExpandPoly}$ in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $72.7\%$ on the raw to $XX\%$ on the modified dataset under a $\LogReg$ model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance to $71.41\%$. Imputing undefined values did not significantly affect performance.\footnote{Results on all models and further detailed analysis in \texttt{Run.ipynb}}.
 
-Based on these results, we compared the performance of different model training algorithms on the pre-processed dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=2.9 \cdot 10{-9}$ for ridge regression.\\
-All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $72.51\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy as reported by the challenge platform for this model was $72.7\%$. 
+Based on these results, we compared the performance of all model training algorithms on the expanded dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=2.9 \cdot 10{-9}$ for ridge regression.\\
+All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $72.51\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy reported by the challenge platform was $72.7\%$. 
 
+\vspace*{-2mm}
 \section{Discussion}
-First and foremost, our experimental results highlight the complexity of the classification task at hand. None of the simplistic feature processing steps applied yielded a satisfying improvement in classification accuracy. More work would be needed to understand the physical meaning of the data features to add more informative or remove redundant features.\\
-The most surprising result we obtained is the relatively good performance of simple models such as the (regularised) MSE estimator $\Ridge$. It is unexpected that models trained via $\LogReg$ did not outperform this simple model with a larger margin. A likely explanation, however, is that due to computational constraints we did not run enough iterations to optimise the compute-intense gradient descent method. Optimisation was terminated when the loss had converged up to a threshold of $10^{-7}$ (see \texttt{README} for further details). A longer search could result in improved performance.\\
-
+Our experimental results highlight the complexity of the classification task at hand. None of the simplistic feature processing steps yielded a satisfying improvement in classification accuracy. Other feature selection strategies, such as removing redundant features with high cross-correlation, not discussed here, neither improved performance.
+More work would be needed to understand the physical meaning of the data features to add more informative or remove redundant features.\\
+The most surprising result we obtained is the relatively good performance of simple models such as the (regularised) MSE estimator $\Ridge$. It is unexpected that models trained via $\LogReg$ did not outperform this simple model with a larger margin.
 
 \bibliography{references}
 \bibliographystyle{IEEEtran}
