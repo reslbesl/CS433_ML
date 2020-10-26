@@ -14,10 +14,12 @@ The code is structured in the following way:
 - `utils.py` contains helper functions for model training and selection, such as data splitting and test data generation.
 - `plots.py` contains functions to visualise the output of model training or evaluation. 
 
-### Example run
+### Re-producing experiments
 To re-generate the submission in `final_submisison.csv` run
 
 ```python run.py``` 
+
+The notebook `Run.ipynb` contains all experiments described in the final project report. In addition, it contains results for some models not described in detail in the report.
 
 ### Models
 
