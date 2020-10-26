@@ -119,7 +119,7 @@ where $\weights_{\LeastSquares} = (X^T X)^{-1}X^T \targetvector$ is the weights 
 	\weights_\LogReg = \underset{\weights}{\text{argmin}} \sum_{i=1}^{N} \log [ 1 + \exp(\features^T\weights) ] - \target\features^T\weights
 \end{equation} 
 
-We implemented gradient descent (GD) on a variant of the NLL loss that is \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size. GD was initialised with a weights vector of all $1$s.
+We implemented gradient descent (GD) on a variant of the NLL loss that is \emph{normalised to the size of the train set}. This enabled us to find the optimal step size $\gamma$ through cross-validation independent of the train set size. GD was initialised with a weights vector of all $0$s.
 
 \subsection{Evaluation Setup}
 The original challenge used a formal objective function referred to as \emph{approximate median significance}~\cite{HiggsML}. We used a simpler evaluation metric to select the best performing model. Each trained model was evaluated based on its \emph{prediction accuracy} on a hold-out set not used during training.\\
@@ -157,14 +157,14 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 
 Cross-validation on $\Dtrain$ showed that expanding the dataset with a polynomial basis with maximum degree $4$ (labelled $\mathtt{ExpandPoly}$ in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $72.7\%$ on the raw to $75.49\%$ on the modified dataset under a $\LogReg$ model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance to $71.41\%$. Imputing undefined values did not significantly affect performance.\footnote{Results on all models and further detailed analysis in \texttt{Run.ipynb}}.
 
-Based on these results, we compared the performance of all model training algorithms on the expanded dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=4.8 \cdot 10{-4}$ for ridge regression.\\
-All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $XX.X\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy reported by the challenge platform was $XX.X\%$. 
+Based on these results, we compared the performance of all training algorithms on the expanded dataset. \autoref{fig:compare} shows the prediction accuracy evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=4.8 \cdot 10{-4}$ for ridge regression.\\
+All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $71.32\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy reported by the challenge platform was $XX.X\%$. 
 
 \vspace*{-2mm}
 \section{Discussion}
 Our experimental results highlight the complexity of the classification task at hand. None of the simplistic feature processing steps yielded a satisfying improvement in classification accuracy. Other feature selection strategies, such as removing redundant features with high cross-correlation, not discussed here, neither improved performance.
 More work would be needed to understand the physical meaning of the data features to add more informative or remove redundant features.\\
-The most surprising result we obtained is the relatively good performance of simple models such as the (regularised) MSE estimator $\Ridge$. It is unexpected that models trained via $\LogReg$ did not outperform this simple model with a larger margin.
+The most surprising result we obtained is the relatively good performance of simple models such as the (regularised) MSE estimator $\Ridge$. It is unexpected that models trained via $\LogReg$ did not outperform this simple model with a larger margin. A likely explanation is that due to computational constraints $\LogReg$ training was terminated before  loss convergence.
 
 \bibliography{references}
 \bibliographystyle{IEEEtran}

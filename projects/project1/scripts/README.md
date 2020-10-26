@@ -43,14 +43,24 @@ It takes the same parameters as `least_squares_GD`. Additionally it checks wheth
 - `logistic_regression`: Applies the GD algorithm to minimize the NLL under L2 regularization. It takes the same parameters as `logistic_regression`, plus the penalization parameter `lambda_`.
 
 `implementation_variants.py` contains some variants of the standard implementations of the models described above:
-- `lasso_GD` : Implements (sub-)GD for Lasso regression. The model finds the minimum MSE weights under the constraints of  minimising the 1-norm  of the weights vector `w`.
-- `logistic_regression_SGD` : Applies SGD to the 'logistic_regression' model. Contrary to the 'least_squares_SGD', the loss function is NNL. See 'least_squares_SGD' for details.
-- `logistic_regression_mean` : variant of 'logistic_regression' where loss and gradient value are normalized to the size of the training set. See 'logistic_regression' for detail
-- `least_squares_SGD_robbinson` : variant of 'least_squares_SGD' using a non-costant step size for Gradiant Descent which decrease at each step. The hyperparameter defining the stepsize is 'r_gamma', and it must be in range [0.5,1]. See 'least_squares_SGD' for details.
+- `lasso_GD` : Implements (sub-)GD for Lasso regression. The model finds the minimum MSE weights under the constraint of  minimising the 1-norm  of the weights vector `w`.
+- `logistic_regression_SGD` : SGD for finding the minimum NLL weights under a `logistic_regression` model. See `least_squares_SGD` for details on input parameters.
+- `logistic_regression_mean` : Variant of `logistic_regression` in which loss and gradient value are normalized to the size of the training set. See `logistic_regression` for detail.
+- `least_squares_SGD_robbinson` : Variant of `least_squares_SGD` using a non-constant step size for GD which decreases at each step.
+The hyperparameter defining the stepsize is `r_gamma`, and it must be in range `[0.5,1]`. See `least_squares_SGD` for details.
 
-### Experiment setup
+### Helper functions for data processing and experiment setup  
+In `data_utils.py` many useful functions for feature standardization and transformation are defined. The main functions are:
+-`feature_transform_mostinfo` : Takes the input data `x` as input. Removes the 10 least informative features from the input data.
+-`feature_transform_imputejet` : Takes the input data `x` as input. Imputes undefined values in the input data by setting such values to the mean of defined values in the data sample.
+-`feature_transform_polybasis` : Takes the input data `x` as input. Performs feature expansion to a polynomial basis of maximum degree `degree`. It automatically handles the presence of undefined values among features.
 
-Describe how functions in `utils.py` and `data_utils.py` can be used to test different models on features (cross-val and splitting)  
+In `utils.py` functions for loading data from `.csv` files are provided.
+Moreover functions to compute prediction accuracy (see `eval_model`), generate prediction on  a test dataset (`predict_labels`), and create `.csv` submission are defined. For details on parameters, and label encodings see the docstring of `eval_model` and `predict_labels`.
+
+There are also functions which are useful when training and validating models, such as:
+- `train_eval_split` : Takes as inputs dataset `y` and `tx`, in addition to `split_ratio` and `seed`. It randomly splits the data set in two sets, train and evaluation, according to the ratio defined by `split_ratio`.
+- `k_fold_iter` : returns a k-fold iterator over a dataset `(y, tx)` in the form of `(train_split, test_split)`. It takes as additional parameters `k_fold`, the number of iteration of the validation algorithm, and `seed` for random shuffle of data samples. 
 
 
 

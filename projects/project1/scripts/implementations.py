@@ -120,7 +120,7 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma, threshold=1e-9, verbose
     return w, loss
 
 
-def least_squares_SGD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose=False):
+def least_squares_SGD(y, x, initial_w, max_iters, gamma, verbose=False):
     """
     Linear regression using stochastic gradient descent with default mini-batch size 1.
 
@@ -156,15 +156,6 @@ def least_squares_SGD(y, x, initial_w, max_iters, gamma, threshold=1e-9, verbose
         if verbose:
             if n_iter % 100 == 0:
                 print("Stochastic GD({bi}/{ti}): loss={l}, gradient={g}".format(bi=n_iter, ti=max_iters - 1, l=loss, g=np.linalg.norm(grad)))
-
-        # Check termination conditions
-        if np.isnan(loss):
-            print('Divergence warning: Terminate because loss is NaN.')
-            break
-
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            print('Loss convergence: Terminate because loss did not change by more than threshold.')
-            break
 
     return w, loss
 
