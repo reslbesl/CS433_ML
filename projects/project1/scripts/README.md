@@ -29,21 +29,21 @@ It was used to select the least informative features with the lowest linear corr
 
 ### Models
 
-Describe models in `implementations.py` and `implementation_variants.py`
-Needs to include: high-level description of the loss function, the optimisation method, additional parameters (for instance, terminating condition for GD methods)
+The following linear classification methods are implemented in `implementations.py`:
+- `least_squares` : Computes the weight vector `w` by solving the normal equations. The returned model weights minimised the mean sqaured error loss between the target labels `y` and the dot product between the input data `x` and the weight vector `w`.
+- `ridge_regression` : Computes the weight vector `w` by solving the normal equation under L2 regularization. That is, penalizing the square of the norm of the vector `w`.
+The function accepts an hyperparameter `lambda_` that is the penalty factor. `lambda_` can be used to guide the trade-off between parameter shrinkage and the optimal MSE solution.
+- `least_squares_GD` : Solves the least-squares problem using gradient descent (GD) (an iterative optimization algotithm based on first-order approximation of the loss function).
+The step size of each update step is set by the input parameter `gamma`.
+The optimisation procedure is either terminated after the maximum number of iterations is reached (`max_iter`) or due to loss convergence (loss does not change by more than `threshold` between two consecutive steps).
+- `least_squares_SGD` : Stochastic Gradient Descent is a variant of the GD algorithm where at each step the gradient value and the weight vector `w` are updated considering a subgroup of data records (batch).
+By default, the batch size is set to 1, meaning that at each step the algorithm picks at random one data sample.
+- `logistic_regression` : Runs gradients descent to minimize the negative log-likelihood (NLL) loss of a logistic regression model.
+It takes the same parameters as `least_squares_GD`. Additionally it checks whether the provided input `y` is a binary set of labels  in `{0, 1}`.
+- `logistic_regression`: Applies the GD algorithm to minimize the NLL under L2 regularization. It takes the same parameters as `logistic_regression`, plus the penalization parameter `lambda_`.
 
-The following models are implemented in `implementations.py`:
-- `least_squares` : computes the weight vector by solving the normal equations. It returns the weight vector and the loss, computed as Mean Squared Error. The Mean Squared Error computes the squared power of the difference between the value of 'y' and the product between the input data 'x' and the weight vector 'w'.
-- `ridge_regression` : computes the weight vector by solving the normal equation under L2 regularization. That is, penalizing the square of the norm of the vector 'w'. The function accepts an hyperparameter 'lambda_' that is the penalty factor. It can be tuned differently to set the severity of the penalization.
-- `least_squares_GD` : solves the least squares problem with the Gradient Descent algorithm (an iterative optimization algotithm based on first-order approximation of the loss function(MSE)). The function takes as additional parameters :'max_iter'(maximum number of iteration), 'gamma' (step size of Gradient Descent), 'threshold' (it sets the minimum difference for the loss computed by two consecutive iterations of the algorithm. If the difference between the two values is below this parameter, the algorithm ends), 'verbose' (bool value to output the steps of the algorithm. Set to false by default). If the loss computed at one step is equal to Nan, the algorithm ends.
-- `least_squares_SGD` : Stochastic Gradient Descent is a variant of the GD algorithm where at each step the gradient value and the weight vector 'w' are updated considering a subgroup of the dataset(batch). By default, the batch size is set to 1, meaning that at each step the algorithm picks at random one data sample.
-- `logistic_regression` : applies the GD algorithm trying to minimize the loss function, computed as negative Log Likelihood (NNL).
-It takes the same parameters as 'least_squares_GD'. Additionally it checks whether the provided input 'y' is a binary set of labels 
-{1;0}.
-- `logistic_regression`: applies the GD algorithm to minimize the NNL under L2 regularization. It takes the same parameters as 'logistic_regression', plus the penalization parameter 'lambda_'.
-
-Furthermore there are some variants to the standard implementations of the mentioned models. There are defined in `implementation_variants.py`:
-- `lasso_GD` : implements GD under Lasso regularization. That is, penalizing the norm 1 of the vector 'w'. See 'ridge_regression' for details.
+`implementation_variants.py` contains some variants of the standard implementations of the models described above:
+- `lasso_GD` : Implements (sub-)GD for Lasso regression. The model finds the minimum MSE weights under the constraints of  minimising the 1-norm  of the weights vector `w`.
 - `logistic_regression_SGD` : Applies SGD to the 'logistic_regression' model. Contrary to the 'least_squares_SGD', the loss function is NNL. See 'least_squares_SGD' for details.
 - `logistic_regression_mean` : variant of 'logistic_regression' where loss and gradient value are normalized to the size of the training set. See 'logistic_regression' for detail
 - `least_squares_SGD_robbinson` : variant of 'least_squares_SGD' using a non-costant step size for Gradiant Descent which decrease at each step. The hyperparameter defining the stepsize is 'r_gamma', and it must be in range [0.5,1]. See 'least_squares_SGD' for details.
