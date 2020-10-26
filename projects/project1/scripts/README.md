@@ -38,7 +38,7 @@ It takes the same parameters as 'least_squares_GD'. Additionally it checks wheth
 {1;0}.
 - `logistic_regression`: applies the GD algorithm to minimize the NNL under L2 regularization. It takes the same parameters as 'logistic_regression', plus the penalization parameter 'lambda_'.
 
-Furthermore there are some variants to the standard implementations of the mentioned models. There are defined in `implementation_variants.py`:
+Furthermore there are some variants to the standard implementations of the mentioned models. They are defined in `implementation_variants.py`:
 - `lasso_GD` : implements GD under Lasso regularization. That is, penalizing the norm 1 of the vector 'w'. See 'ridge_regression' for details.
 - `logistic_regression_SGD` : Applies SGD to the 'logistic_regression' model. Contrary to the 'least_squares_SGD', the loss function is NNL. See 'least_squares_SGD' for details.
 - `logistic_regression_mean` : variant of 'logistic_regression' where loss and gradient value are normalized to the size of the training set. See 'logistic_regression' for detail
