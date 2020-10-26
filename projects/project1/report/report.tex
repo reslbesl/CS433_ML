@@ -47,7 +47,7 @@
 \title{Project Report - Discovering the Higgs Particle}
 
 \author{
-  Names\\
+  Francesco Intocci, Mattia Mariantoni, Theresa Stadler\\
   \textit{Department of Computer Science, EPFL, Switzerland}
 }
 
@@ -73,7 +73,7 @@ The data provided comprised 250,000 labelled training examples and 568,238 unlab
 We denote as $\Data = (X, \targetvector)$ a dataset where $X \in \mathbb{R}^{N \times D}$ is a matrix with the $i$-th row containing the $D$-dimensional feature vector $\features^T$ of the $i$-the record and $\targetvector$ is a column vector that contains the labels $\target \in \targetset$ of all $N$ records.       
 In the original dataset, each feature vector $\features$ contained $d=30$ numerical features of which $29$ were continuous and $1$ discrete.  
 
-\parabf{Feature selection.} \autoref{sec:results} presents experimental results on the classification performance across different feature sets. Here, we describe in short the different feature engineering strategies that were tested.
+\parabf{Feature selection.} \autoref{sec:results} presents experimental results on the classification performance across different feature sets. Here, we describe in short the different feature engineering strategies that were tested\footnote{See also \texttt{Run.ipynb} and \texttt{Data Exploration.ipynb} for details}.
 
 \parait{MostInfo.} All models were tested on a reduced set of features that only pertained the 20 features with the highest linear correlation with the target variable.
 
@@ -155,10 +155,10 @@ $\classifier{\Train}{\{ \Dtrain, \Deval\}}$ and the test set predictions were su
 	\vspace*{-5mm}
 \end{figure}
 
-Cross-validation on $\Dtrain$ showed that expanding the dataset with a polynomial basis with maximum degree $4$ (labelled $\mathtt{ExpandPoly}$ in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $72.7\%$ on the raw to $XX\%$ on the modified dataset under a $\LogReg$ model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance to $71.41\%$. Imputing undefined values did not significantly affect performance.\footnote{Results on all models and further detailed analysis in \texttt{Run.ipynb}}.
+Cross-validation on $\Dtrain$ showed that expanding the dataset with a polynomial basis with maximum degree $4$ (labelled $\mathtt{ExpandPoly}$ in \autoref{fig:features}) yielded the highest accuracy across all classifiers. Average test accuracy increased from $72.7\%$ on the raw to $75.49\%$ on the modified dataset under a $\LogReg$ model with $\gamma = 0.01$. Removing uninformative features decreased average classification performance to $71.41\%$. Imputing undefined values did not significantly affect performance.\footnote{Results on all models and further detailed analysis in \texttt{Run.ipynb}}.
 
-Based on these results, we compared the performance of all model training algorithms on the expanded dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=2.9 \cdot 10{-9}$ for ridge regression.\\
-All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $72.51\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy reported by the challenge platform was $72.7\%$. 
+Based on these results, we compared the performance of all model training algorithms on the expanded dataset. \autoref{fig:compare} shows the prediction accuracy of all models evaluated over $\Deval$. Cross-validation over $\Dtrain$ was used to find the optimal step size $\gamma=0.01$ for $\LogReg$ training and the optimal trade-off parameter $\lambda=4.8 \cdot 10{-4}$ for ridge regression.\\
+All models significantly outperformed the baseline $\Baseline$ with $54.95\%$. The logistic regression model $\LogReg$ reached the highest prediction accuracy with $XX.X\%$. After training a model with the same parameter settings over the combined train set (all labelled records), test set accuracy reported by the challenge platform was $XX.X\%$. 
 
 \vspace*{-2mm}
 \section{Discussion}

@@ -40,6 +40,7 @@ The following models are implemented in `implementations.py`:
 - `logistic_regression` : applies the GD algorithm trying to minimize the loss function, computed as negative Log Likelihood (NNL).
 It takes the same parameters as 'least_squares_GD'. Additionally it checks whether the provided input 'y' is a binary set of labels 
 {1;0}.
+
 ### Experiment setup
 
 Describe how functions in `utils.py` and `data_utils.py` can be used to test different models on features (cross-val and splitting)  
